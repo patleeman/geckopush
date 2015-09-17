@@ -1,7 +1,6 @@
 #Geckopush
-##Easy to use library to push data to custom widgets on Geckoboard.com
-
-The goal behind this library is to be easy to set up and easy to use.
+###Easy to use python library for pushing data your custom Geckoboard widgets
+The goal behind this library is to make pushing data to your Geckoboard widgets quick and painless.
 
 [Geckoboard API Docs](https://developer.geckoboard.com/)
 
