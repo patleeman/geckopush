@@ -1,6 +1,8 @@
 import urllib.request
 import json
 
+# todo: make sure there is an _add method to every widget so the default will be to add widget data after a widget has been initialized
+# User experience: Make sure a user can either initialize a widget in one line, or by using the add method for every widget.
 
 class Dashboard(object):
     '''
@@ -41,7 +43,6 @@ class Widget(object):
         }
         dashboard.widgets.append(self)
 
-
     def _assemble_data(self):
         pass
 
@@ -76,14 +77,28 @@ class GeckoboardException(Exception):
 
 class BarChart(Widget):
     # BarChart widget.  User must supply widget_key, data, and dashboard object.
-    def __init__(self, widget_key, data, *args, **kwargs):
+    def __init__(self, widget_key, data=None, x_axis_labels=None,
+                 x_axis_type=None, y_axis_format=None, y_axis_unit=None,
+                 *args, **kwargs):
         super(BarChart, self).__init__(*args, **kwargs)
         self.widget_key = widget_key
         self.data = [{"data": data}]
-        self.x_axis_labels = None
-        self.x_axis_type = None
-        self.y_axis_format = None
-        self.y_axis_unit = None
+        self.x_axis_labels = x_axis_labels
+        self.x_axis_type = x_axis_type
+        self.y_axis_format = y_axis_format
+        self.y_axis_unit = y_axis_unit
+
+    def add(self, data, x_axis_labels=None, x_axis_type=None,
+            y_axis_format=None, y_axis_unit=None):
+
+        if self.data[0]["data"] is not None:
+            raise GeckoboardException("Widget data has been initialized already.")
+
+        self.data[0]["data"] = data
+        self.x_axis_labels = x_axis_labels
+        self.x_axis_type = x_axis_type
+        self.y_axis_format = y_axis_format
+        self.y_axis_unit = y_axis_unit
 
     def _assemble_data(self):
         _data = {
@@ -327,3 +342,41 @@ class Leaderboard(Widget):
             _data["unit"] = self.unit
 
         self._assemble_payload(_data)
+
+
+class LineChart(Widget):
+    def __init__(self, widget_key, name=None, incomplete_from=None, type=None,
+                 x_axis_labels=None, x_axis_type=None, y_axis_format=None,
+                 y_axis_unit=None, *args, **kwargs):
+        super(LineChart, self).__init__(*args, **kwargs)
+        self.widget_key = widget_key
+        self.name=name
+        self.incomplete_from = incomplete_from
+        self.type = type
+        self.x_axis_labels = x_axis_labels
+        self.x_axis_type = x_axis_type
+        self.y_axis_format = y_axis_format
+        self.y_axis_unit = y_axis_unit
+        self.series = []
+
+    def _add(self, name, data, incomplete_from=None):
+        pass
+
+    def _assemble_data(self):
+        _data = {
+            "series": self.series,
+            "y_axis": {},
+            "x_axis": {}
+        }
+
+        if self.x_axis_labels is not None:
+            _data["x_axis"]["labels"] = self.x_axis_labels
+
+        if self.x_axis_type is not None:
+            _data["x_axis"]["type"] = self.x_axis_type
+
+        if self.y_axis_format is not None:
+            _data["y_axis"]["format"] = self.y_axis_format
+
+        if self.y_axis_unit is not None:
+            _data["y_axis"]["unit"] = self.y_axis_format
