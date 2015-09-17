@@ -78,3 +78,12 @@ d.push_all()
 ```
 
 It's **that** easy!
+
+Notes:
+
+* Each widget must specify which dashboard object you're using.  i.e.
+
+    ```python
+    dash = geckopush.Dashboard('API-KEY')
+    custom_widget = geckopush.<widget>(dashboard=dash, ...)
+    ```
