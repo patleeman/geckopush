@@ -42,14 +42,14 @@ class Widget(object):
         dashboard.widgets.append(self)
 
 
-    def _assemble_item(self):
+    def _assemble_data(self):
         pass
 
     def _assemble_payload(self, _data_module):
         self.payload["data"] = _data_module
 
     def push(self):
-        self._assemble_item()
+        self._assemble_data()
         _api_endpoint = 'https://push.geckoboard.com/v1/send/'\
                         '{widget_key}'.format(widget_key=self.widget_key)
         _payload_json = json.dumps(self.payload).encode('utf-8')
@@ -57,10 +57,12 @@ class Widget(object):
                                           data=_payload_json
                                           )
         _request.add_header('Content-Type', 'application/json')
+
         try:
             _response = urllib.request.urlopen(_request)
-            _api_status = _response.read()
-            print(_api_status)
+            _api_status = json.loads(_response.read().decode('utf-8'))
+            print("API Success: {}".format(_api_status["success"]))
+
         except urllib.request.HTTPError as e:
             print(e)
 
@@ -77,36 +79,32 @@ class BarChart(Widget):
     def __init__(self, widget_key, data, *args, **kwargs):
         super(BarChart, self).__init__(*args, **kwargs)
         self.widget_key = widget_key
-        self.data = data
+        self.data = [{"data": data}]
         self.x_axis_labels = None
         self.x_axis_type = None
         self.y_axis_format = None
         self.y_axis_unit = None
 
-    def _assemble_item(self):
-        _item = {
+    def _assemble_data(self):
+        _data = {
             "x_axis": {},
             "y_axis": {},
-            "series": [
-                {
-                    "data": self.data
-                }
-            ]
+            "series": self.data
         }
 
         if self.x_axis_labels is not None:
-            _item["x_axis"]["labels"] = self.x_axis_labels
+            _data["x_axis"]["labels"] = self.x_axis_labels
 
         if self.x_axis_type is not None:
-            _item["x_axis"]["type"] = self.x_axis_type
+            _data["x_axis"]["type"] = self.x_axis_type
 
         if self.y_axis_format is not None:
-            _item["y_axis"]["format"] = self.y_axis_format
+            _data["y_axis"]["format"] = self.y_axis_format
 
         if self.y_axis_unit is not None:
-            _item["y_axis"]["unit"] = self.y_axis_unit
+            _data["y_axis"]["unit"] = self.y_axis_unit
 
-        self._assemble_payload(_item)
+        self._assemble_payload(_data)
 
 
 class BulletGraph(Widget):
@@ -117,7 +115,7 @@ class BulletGraph(Widget):
 
         super(BulletGraph, self).__init__(*args, **kwargs)
         self.widget_key = widget_key
-        self.orientation = [orientation]
+        self.orientation = orientation
         self.label = [label]
         self.axis = [axis]
         self.red_start = [red_start]
@@ -134,14 +132,15 @@ class BulletGraph(Widget):
         self.sublabel = [sublabel]
         self.counter = 1
 
-    def add(self, orientation, label, axis, red_start, red_end, amber_start,
+    def add(self, label, axis, red_start, red_end, amber_start,
             amber_end, green_start, green_end, measure_start, measure_end,
             projected_start, projected_end, comparative, sublabel=None):
 
         if self.counter >= 4:
-            raise GeckoboardException("BarCharts support a maximum of 4 multiples.")
+            raise GeckoboardException(
+                "Bullet Graphs support a maximum of 4 multiples."
+            )
 
-        self.orientation.append(orientation)
         self.label.append(label)
         self.axis.append(axis)
         self.red_start.append(red_start)
@@ -159,55 +158,64 @@ class BulletGraph(Widget):
         self.counter += 1
 
 
-    def _assemble_item(self):
+    def _assemble_data(self):
+        _data = {
+            "orientation": self.orientation,
+            "item": None
+        }
         _item = []
         for x in range(self.counter):
-            _data = {
-                "orientation": self.orientation[x],
-                "item": {
-                    "label": self.label[x],
-                    "axis": self.axis[x],
-                    "range": {
-                        "red": {
-                            "start": self.red_start[x],
-                            "end": self.red_end[x]
+            _item_payload = {
+                        "label": self.label[x],
+                        "axis": {
+                            "point": self.axis[x],
                         },
-                        "amber": {
-                            "start": self.amber_start[x],
-                            "end": self.amber_end[x]
+                        "range": {
+                            "red": {
+                                "start": self.red_start[x],
+                                "end": self.red_end[x]
+                            },
+                            "amber": {
+                                "start": self.amber_start[x],
+                                "end": self.amber_end[x]
 
+                            },
+                            "green": {
+                                "start": self.green_start[x],
+                                "end": self.green_end[x]
+                            }
                         },
-                        "green": {
-                            "start": self.green_start[x],
-                            "end": self.green_end[x]
+                        "measure": {
+                            "current": {
+                                "start": self.measure_start[x],
+                                "end": self.measure_end[x]
+                            },
+                        "projected": {
+                            "start": self.projected_start[x],
+                            "end": self.projected_end[x]
+                        }
+                    },
+                    "comparative": {
+                        "point": self.comparative[x]
                         }
                     }
-                },
-                "measure": {
-                    "current": {
-                        "start": self.measure_start[x],
-                        "end": self.measure_end[x]
-                    },
-                    "projected": {
-                        "start": self.projected_start[x],
-                        "end": self.projected_end[x]
-                    }
-                },
-                "comparative": {
-                    "point": self.comparative[x]
-                }
-            }
 
             if self.sublabel is not None:
-                _data["item"]["sublabel"] = self.sublabel
+                _item_payload["sublabel"] = self.sublabel[x]
 
-            _item.append(_data)
+            _item.append(_item_payload)
 
-        self._assemble_payload(_item)
+        if self.counter == 1:
+            _data["item"] =_item[0]
+        elif self.counter > 1 and self.counter <= 4:
+            _data["item"] = _item
+
+        self._assemble_payload(_data)
 
 
 class Funnel(Widget):
-    def __init__(self, widget_key, type=None, percentage=None, *args, **kwargs):
+    def __init__(self, widget_key, type=None, percentage=None,
+                 *args, **kwargs):
         super(Funnel, self).__init__(*args, **kwargs)
         self.widget_key = widget_key
         self.type=type
@@ -217,7 +225,9 @@ class Funnel(Widget):
 
     def add(self, value, label):
         if self.counter >= 8:
-            raise GeckoboardException("Funnel widgets support a max of 8 steps.")
+            raise GeckoboardException(
+                "Funnel widgets support a max of 8 steps."
+            )
 
         _step = {
             "value": value,
@@ -226,14 +236,94 @@ class Funnel(Widget):
         self.funnel_steps.append(_step)
         self.counter += 1
 
-    def _assemble_item(self):
-        _item = {
+    def _assemble_data(self):
+        if self.counter == 0:
+            raise GeckoboardException("Must add at least one value.")
+
+        _data = {
             "item": self.funnel_steps
         }
         if self.type is not None:
-            _item["type"] = self.type
+            _data["type"] = self.type
 
         if self.percentage is not None:
-            _item["percentage"] = self.percentage
+            _data["percentage"] = self.percentage
 
-        self._assemble_payload(_item)
+        self._assemble_payload(_data)
+
+
+class GeckoMeter(Widget):
+    def __init__(self, widget_key, item, min_value, max_value,
+                 *args, **kwargs):
+        super(GeckoMeter, self).__init__(*args, **kwargs)
+        self.widget_key = widget_key
+        self.item = item
+        self.min_value = min_value
+        self.max_value = max_value
+
+    def _assemble_data(self):
+        _data = {
+            "item": self.item,
+            "min": {
+                "value": self.min_value
+            },
+            "max": {
+                "value": self.max_value
+            }
+        }
+        self._assemble_payload(_data)
+
+
+class HighCharts(Widget):
+    def __init__(self, widget_key, highchart, *args, **kwargs):
+        super(HighCharts, self).__init__(*args, **kwargs)
+        self.widget_key = widget_key
+        self.highchart = highchart
+
+    def _assemble_data(self):
+        if not isinstance(self.highchart, str):
+            raise TypeError("Highchart must be a string object")
+        _data = {
+            "highchart": self.highchart
+        }
+        self._assemble_payload(_data)
+
+class Leaderboard(Widget):
+    def __init__(self, widget_key, format=None, unit=None, *args, **kwargs):
+        super(Leaderboard, self).__init__(*args, **kwargs)
+        self.widget_key = widget_key
+        self.format = format
+        self.unit = unit
+        self.labels = []
+
+    def add(self, label, value=None, previous_rank=None):
+        _item = {
+            "label": label
+        }
+
+        if value is not None:
+            _item["value"] = value
+
+        if previous_rank is not None:
+            _item["previous_rank"] = previous_rank
+
+        self.labels.append(_item)
+
+    def _assemble_data(self):
+        if len(self.labels) > 22:
+            raise GeckoboardException(
+                "Leaderboard widget accepts a max of 22 labels"
+            )
+        elif len(self.labels) == 0:
+            raise GeckoboardException("Must add at least one value.")
+
+        _data = {
+            "items": self.labels
+        }
+        if self.format is not None:
+            _data["format"] = self.format
+
+        if self.unit is not None:
+            _data["unit"] = self.unit
+
+        self._assemble_payload(_data)
