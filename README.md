@@ -6,7 +6,7 @@ The goal behind this library is to make pushing data to your Geckoboard widgets 
 
 Quickstart:
 
-'''python
+```python
 from Geckopush import geckopush
 
 # Initialize your dashboard by creating a dashboard object
@@ -30,14 +30,14 @@ bar.y_axis_format = "decimal"
 
 # Push the data to the dashboard
 bar.push()
-'''
+```
 
 That's it, you've push some data to your geckoboard widget!
 
 
 
 If you want to initialize multiple widgets, then send data to them all at once:
-'''python
+```python
 from Geckopush import geckopush
 
 api_key = '<api key from geckoboard>'
@@ -75,6 +75,6 @@ bullet = geckopush.BulletGraph(dashboard=d,
 
 # Push to all your widgets at once
 d.push_all()
-'''
+```
 
 It's **that** easy!
