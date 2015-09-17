@@ -1,5 +1,5 @@
-# geckoboard_push
-Easy to use library to push data to custom widgets on Geckoboard.com
+#Geckopush
+##Easy to use library to push data to custom widgets on Geckoboard.com
 
 The goal behind this library is to be easy to set up and easy to use.
 
@@ -72,4 +72,4 @@ If you want to initialize multiple widgets, then send data to them all at once:
     # Push to all your widgets at once
     d.push_all()
 
-It's *that* easy!
+It's **that** easy!
