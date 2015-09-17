@@ -16,7 +16,7 @@ def test_bar_chart():
     bar.x_axis_labels = ["one", "two", "three"]
     bar.x_axis_type = "standard"
     bar.y_axis_format = "decimal"
-    bar.push()
+    #bar.push()
     print(bar.payload)
 
 def test_bullet_graph():
@@ -55,8 +55,8 @@ def test_bullet_graph():
        projected_start='600',
        projected_end='900'
     )
-    bullet.push()
-    pprint.pprint(bullet.payload)
+    #bullet.push()
+    #pprint.pprint(bullet.payload)
 
 def test_funnel():
     funnel_widget_key = widget_keys['funnel_widget_key']
@@ -103,6 +103,9 @@ def test_leaderboard():
     print(lb.payload)
 
 if __name__ == '__main__':
+    test_bar_chart()
+    test_bullet_graph()
     #test_funnel()
     #test_highchart()
-    test_leaderboard()
+    #test_leaderboard()
+    d.push_all()
