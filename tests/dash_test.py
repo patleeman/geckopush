@@ -16,14 +16,15 @@ def test_bar_chart():
     bar.x_axis_labels = ["one", "two", "three"]
     bar.x_axis_type = "standard"
     bar.y_axis_format = "decimal"
-    #bar.push()
+    bar.push()
     print(bar.payload)
 
 def test_bullet_graph():
     bullet_widget_key = widget_keys['bullet_widget_key']
+    bullet = geckopush.BulletGraph(dashboard=d, widget_key=bullet_widget_key,)
+    '''
     bullet = geckopush.BulletGraph(dashboard=d,
                                    widget_key=bullet_widget_key,
-                                   orientation='vertical',
                                    label='Test Bullet Graph',
                                    axis=["0", "200", "400", "600", "800", "1000"],
                                    comparative="200",
@@ -38,8 +39,8 @@ def test_bullet_graph():
                                    sublabel="A test Bullet graph",
                                    projected_start='100',
                                    projected_end='900',
-                                   )
-    bullet.add(
+                                   )'''
+    bullet.add_data(
        label='Second Bullet Graph',
        axis=["0", "200", "400", "600", "800", "1000"],
        comparative="100",
@@ -55,23 +56,23 @@ def test_bullet_graph():
        projected_start='600',
        projected_end='900'
     )
-    #bullet.push()
-    #pprint.pprint(bullet.payload)
+    print(bullet.data)
+    print(bullet.payload)
+    bullet.push()
 
 def test_funnel():
     funnel_widget_key = widget_keys['funnel_widget_key']
     fun = geckopush.Funnel(dashboard=d, widget_key=funnel_widget_key)
-    fun.add(100, "Prepare romantic dinner")
-    fun.add(200, "Wrap present")
-    fun.add(300, "Cut a hole in the box")
-    fun.add(400, "Put your junk in the box")
-    fun.add(500, "Make her open the box")
-    fun.add(600, "That's the way you do it")
-    fun.add(700, "That's my dk in a box")
-    fun.add(800, "dk in a box, yeah.")
+    fun.add_data(100, "Prepare romantic dinner")
+    fun.add_data(200, "Wrap present")
+    fun.add_data(300, "Cut a hole in the box")
+    fun.add_data(400, "Put your junk in the box")
+    fun.add_data(500, "Make her open the box")
+    fun.add_data(600, "That's the way you do it")
+    fun.add_data(700, "That's my dk in a box")
+    fun.add_data(800, "dk in a box, yeah.")
 
     fun.push()
-    pprint.pprint(fun.payload)
 
 
 def test_geckometer():
@@ -94,18 +95,79 @@ def test_leaderboard():
     leaderboard_widget_key = widget_keys["leaderboard_widget_key"]
     lb = geckopush.Leaderboard(dashboard=d,
                                widget_key=leaderboard_widget_key)
-    lb.add("Jack", 1, 0)
-    lb.add("Bob", 2, 1)
-    lb.add("Renaldo", 10, 6)
-    lb.add("Barney", 0, 0)
-    lb.add("Farnsworth", 1, 1)
+    lb.add_data("Jack", 1, 0)
+    lb.add_data("Bob", 2, 1)
+    lb.add_data("Renaldo", 10, 6)
+    lb.add_data("Barney", 0, 0)
+    lb.add_data("Farnsworth", 1, 1)
     lb.push()
-    print(lb.payload)
+
+
+def test_line_chart():
+    linechart_widget_key = widget_keys["linechart_widget_key"]
+    lc = geckopush.LineChart(dashboard=d,
+                             widget_key=linechart_widget_key)
+    lc.add_data(data=[[1,2],[2,3],[3,5]], name="BonerJamz")
+    lc.add_data(data=[[2,2], [3,4], [4,5]], name="Smooth")
+
+    lc.push()
+    pprint.pprint(lc.payload)
+
+def test_line_chart_list():
+    linechart_widget_key = widget_keys["linechart_widget_key"]
+    lc = geckopush.LineChart(dashboard=d,
+                             widget_key=linechart_widget_key)
+    lc.add_data(data=[1,2,3,4,5], name="womp")
+    lc.add_data(data=[2,5,5,1,1], name="omp")
+    lc.add(x_axis_labels=['one', 'two', 'three', 'four', 'five'])
+    lc.push()
+    pprint.pprint(lc.payload)
+
+
+def test_line_chart_datetime():
+    linechart_widget_key = widget_keys["linechart_widget_key"]
+    lc = geckopush.LineChart(dashboard=d,
+                             widget_key=linechart_widget_key)
+    lc.add_data(name="data over time", data=[['2015-09-07', 400], ['2015-09-02', 500]])
+    lc.add(x_axis_type="datetime")
+    #lc.add(y_axis_format="currency")
+    #lc.add(y_axis_unit="EUR")
+    lc.push()
+    pprint.pprint(lc.payload)
+
+def test_line_chart_datetime2():
+    linechart_widget_key = widget_keys["linechart_widget_key"]
+    lc = geckopush.LineChart(dashboard=d,
+                             widget_key=linechart_widget_key)
+    lc.add_data(name="data over time", data=[400, 500, 900, 900, 1000])
+    lc.add_data(name="boners over time", data=[1000,900,800,200,100])
+    lc.add(x_axis_labels=["2015-10-01", "2015-10-02", "2015-10-03", "2015-10-04", "2015-10-06"])
+    lc.add(x_axis_type="datetime")
+    lc.add(y_axis_format="currency")
+    lc.add(y_axis_unit="USD")
+    lc.push()
+    pprint.pprint(lc.payload)
+
+
+def test_List():
+    lst_widget_key = widget_keys["list_widget_key"]
+    lt = geckopush.List(dashboard=d,
+                        widget_key=lst_widget_key)
+    lt.add_data(text="stuff", name="HOT",
+                color="#ff2015", description="Something describes here")
+
+    lt.push()
+    print(lt.payload)
 
 if __name__ == '__main__':
-    test_bar_chart()
-    test_bullet_graph()
+    #test_bar_chart()
     #test_funnel()
+    #test_bullet_graph()
+    #test_geckometer()
     #test_highchart()
     #test_leaderboard()
-    d.push_all()
+    #test_line_chart()
+    #test_line_chart_list()
+    #test_line_chart_datetime()
+    #test_line_chart_datetime2()
+    test_List()
