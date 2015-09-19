@@ -1,8 +1,6 @@
 import urllib.request
 import json
 
-# todo: make sure there is an _add method to every widget so the default will be to add widget data after a widget has been initialized
-# User experience: Make sure a user can either initialize a widget in one line, or by using the add method for every widget.
 
 class Dashboard(object):
     """
@@ -29,10 +27,10 @@ class Widget(object):
     class houses the main push function as well as the final payload
     assembly steps.
     """
-    def __init__(self, dashboard):
+    def __init__(self, dashboard, widget_key):
         self.dashboard = dashboard
         self.api_key = dashboard.api_key
-        self.widget_key = None
+        self.widget_key = widget_key
         self.payload = {
             "api_key": self.api_key,
             "data": {
@@ -43,14 +41,22 @@ class Widget(object):
         }
         dashboard.widgets.append(self)
 
+    def __str__(self):
+        print("Dashboard: {}, Widget_Key: {}".format(self.dashboard,
+                                                     self.widget_key))
+
+    def __repr__(self):
+        print("<Geckopush Object (D: {}; WK: {}>".format(self.dashboard,
+                                                        self.widget_key))
+
     def _assemble_data(self, *args, **kwargs):
         pass
 
     def add(self, *args, **kwargs):
-        pass
+        raise GeckoboardException("Method has no effect in this widget")
 
     def add_data(self, *args, **kwargs):
-        pass
+        raise GeckoboardException("Method has no effect in this widget")
 
     def _assemble_payload(self, _data_module, *args, **kwargs):
         self.payload["data"] = _data_module
@@ -79,31 +85,24 @@ class GeckoboardException(Exception):
 
 
 class BarChart(Widget):
-    def __init__(self, widget_key, data=None, x_axis_labels=None,
+    def __init__(self, data=None, x_axis_labels=None,
                  x_axis_type=None, y_axis_format=None, y_axis_unit=None,
                  *args, **kwargs):
         super(BarChart, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.data = []
         self.x_axis_labels = x_axis_labels
         self.x_axis_type = x_axis_type
         self.y_axis_format = y_axis_format
         self.y_axis_unit = y_axis_unit
 
+        if data is not None:
+            self.add_data(data=data)
 
     def add_data(self, data, *args, **kwargs):
         self.data.append({"data": data})
 
-
-    def add(self, data=None, x_axis_labels=None, x_axis_type=None,
-            y_axis_format=None, y_axis_unit=None):
-
-        if self.data[0]["data"] is not None:
-            raise GeckoboardException(
-                "Widget data has already been initialized."
-            )
-        else:
-            self.data[0]["data"] = data
+    def add(self, x_axis_labels=None, x_axis_type=None, y_axis_format=None,
+            y_axis_unit=None):
 
         if x_axis_labels is not None: self.x_axis_labels = x_axis_labels
         if x_axis_type is not None: self.x_axis_type = x_axis_type
@@ -111,7 +110,7 @@ class BarChart(Widget):
         if y_axis_unit is not None: self.y_axis_unit = y_axis_unit
 
     def _assemble_data(self):
-        if self.data is None:
+        if len(self.data) == 0:
             raise GeckoboardException("Widget missing required data.")
 
         _data = {
@@ -136,20 +135,20 @@ class BarChart(Widget):
 
 
 class BulletGraph(Widget):
-    def __init__(self, widget_key, orientation=None, label=None, axis=None,
+    def __init__(self, orientation=None, label=None, axis=None,
                  red_start=None, red_end=None, amber_start=None,
                  amber_end=None, green_start=None, green_end=None,
                  measure_start=None, measure_end=None, projected_start=None,
                  projected_end=None, comparative=None, sublabel=None,
                  *args, **kwargs):
         super(BulletGraph, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.orientation = orientation
         self.data = []
 
         _necessary = [label, axis, red_start, red_end, amber_start, amber_end,
                       green_start, green_end, measure_start, measure_end,
                       projected_start, projected_end, comparative]
+        # Check if any of the required elements is None (not entered)
         _necessary_none = list(bool(item is None) for item in _necessary)
         _is_all_none = all(_necessary_none)
 
@@ -157,12 +156,10 @@ class BulletGraph(Widget):
             self.add_data(label, axis, red_start, red_end, amber_start,
                           amber_end, green_start, green_end, measure_start,
                           measure_end, projected_start, projected_end,
-                          comparative)
-
+                          comparative, sublabel)
 
     def add(self, orientation=None, *args, **kwargs):
         if orientation is not None: self.orientation = orientation
-
 
     def add_data(self, label, axis, red_start, red_end, amber_start,
             amber_end, green_start, green_end, measure_start, measure_end,
@@ -207,13 +204,14 @@ class BulletGraph(Widget):
                         "projected": {
                             "start": projected_start,
                             "end": projected_end
+                            }
+                        },
+                        "comparative": {
+                            "point": comparative
+                            }
                         }
-                    },
-                    "comparative": {
-                        "point": comparative
-                        }
-                    }
-
+        if sublabel is not None:
+            _item_payload["sublabel"] = sublabel
 
         self.data.append(_item_payload)
 
@@ -251,16 +249,14 @@ class BulletGraph(Widget):
 
 
 class Funnel(Widget):
-    def __init__(self, widget_key, value=None, label=None, type=None,
+    def __init__(self, value=None, label=None, type=None,
                  percentage=None, *args, **kwargs):
         super(Funnel, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.type = type
         self.percentage = percentage
         self.data = []
         if value is not None and label is not None:
             self.data.append({"value": value, "label": label})
-
 
     def add_data(self, value, label):
         if len(self.data) >= 8:
@@ -273,7 +269,6 @@ class Funnel(Widget):
             "label": label,
         }
         self.data.append(_step)
-
 
     def _assemble_data(self):
         if len(self.data) == 0:
@@ -292,21 +287,22 @@ class Funnel(Widget):
 
 
 class GeckoMeter(Widget):
-    def __init__(self, widget_key, item=None, min_value=None, max_value=None,
+    def __init__(self, item=None, min_value=None, max_value=None,
                  *args, **kwargs):
         super(GeckoMeter, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.item = item
         self.min_value = min_value
         self.max_value = max_value
-
-
 
     def add_data(self, item, min_value, max_value):
+        if self.item is not None \
+                or self.min_value is not None \
+                or self.max_value is not None:
+            raise GeckoboardException("Widget already initialized")
+
         self.item = item
         self.min_value = min_value
         self.max_value = max_value
-
 
     def _assemble_data(self):
         if self.item is None \
@@ -327,14 +323,13 @@ class GeckoMeter(Widget):
 
 
 class HighCharts(Widget):
-    def __init__(self, widget_key, highchart=None, *args, **kwargs):
+    def __init__(self, highchart=None, *args, **kwargs):
         super(HighCharts, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.highchart = highchart
 
     def add_data(self, highchart):
         if self.highchart is not None:
-            raise GeckoboardException("Widget has data already assigned.")
+            raise GeckoboardException("Widget already initialized.")
 
         self.highchart = highchart
 
@@ -351,17 +346,15 @@ class HighCharts(Widget):
 
 
 class Leaderboard(Widget):
-    def __init__(self, widget_key, label=None, value=None, previous_rank=None,
+    def __init__(self, label=None, value=None, previous_rank=None,
                  format=None, unit=None, *args, **kwargs):
         super(Leaderboard, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.format = format
         self.unit = unit
         self.data = []
 
         if label is not None:
             self.add_data(label, value, previous_rank)
-
 
     def add_data(self, label, value=None, previous_rank=None):
         _item = {
@@ -375,7 +368,6 @@ class Leaderboard(Widget):
             _item["previous_rank"] = previous_rank
 
         self.data.append(_item)
-
 
     def _assemble_data(self):
         if len(self.data) > 22:
@@ -398,11 +390,10 @@ class Leaderboard(Widget):
 
 
 class LineChart(Widget):
-    def __init__(self, widget_key, data=None, name=None, incomplete_from=None,
+    def __init__(self, data=None, name=None, incomplete_from=None,
                  type=None, x_axis_labels=None, x_axis_type=None,
                  y_axis_format=None, y_axis_unit=None, *args, **kwargs):
         super(LineChart, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.x_axis_labels = x_axis_labels
         self.x_axis_type = x_axis_type
         self.y_axis_format = y_axis_format
@@ -411,7 +402,6 @@ class LineChart(Widget):
 
         if data is not None:
             self.add_data(data, name, incomplete_from, type)
-
 
     def add_data(self, data, name=None, incomplete_from=None, type=None,
                  *args, **kwargs):
@@ -422,7 +412,6 @@ class LineChart(Widget):
             self.data.append({"data": data})
         if incomplete_from is not None: self.incomplete_from = incomplete_from
         if type is not None: self.type = type
-
 
     def add(self, x_axis_labels=None, x_axis_type=None, y_axis_format=None,
              y_axis_unit=None):
@@ -435,14 +424,12 @@ class LineChart(Widget):
         if y_axis_unit is not None:
             self.y_axis_unit = y_axis_unit
 
-
     def _label_data_check(self):
         _is_pairs = [bool(self._data_check(x["data"])) for x in self.data]
         if all(_is_pairs) and self.x_axis_labels is not None:
             raise GeckoboardException("Two x-axis labels provided.")
         elif not all(not x for x in _is_pairs) and not all(_is_pairs):
             raise GeckoboardException("Can not mix pairs and lists.")
-
 
     def _data_check(self, data):
         """
@@ -452,7 +439,6 @@ class LineChart(Widget):
             pass
         elif data is not None:
             return bool(any(isinstance(l, list) for l in data))
-
 
     def _assemble_data(self):
         if len(self.data) == 0:
@@ -482,11 +468,13 @@ class LineChart(Widget):
 
 
 class List(Widget):
-    def __init__(self, widget_key, text=None, name=None, color=None,
+    def __init__(self, text=None, name=None, color=None,
                  description=None, *args, **kwargs):
         super(List, self).__init__(*args, **kwargs)
-        self.widget_key = widget_key
         self.data = []
+
+        if text is not None:
+            self.add_data(text, name, color, description)
 
     def add_data(self, text, name=None, color=None, description=None):
         _data = {
@@ -511,3 +499,166 @@ class List(Widget):
 
     def _assemble_data(self, *args, **kwargs):
         self._assemble_payload(self.data)
+
+
+class Map(Widget):
+    def __init__(self, city_name=None, country_code=None,
+                 region_code=None, latitude=None, longitude=None, ip=None,
+                 host=None, color=None, size=None, *args, **kwargs):
+        super(Map, self).__init__(*args, **kwargs)
+        self.points = []
+
+    def add_data(self, city_name=None, country_code=None,
+                 region_code=None, latitude=None, longitude=None, ip=None,
+                 host=None, color=None, size=None, *args, **kwargs):
+
+        #Checking if country code or region is provided but not city name
+        if country_code or region_code is not None:
+            if city_name is None:
+                raise GeckoboardException("Widget missing required data.")
+
+        # Checking for a missing longitude or latitude
+        if bool(latitude) == bool(not longitude):
+            raise GeckoboardException("Widget missing required data.")
+
+        # Check if more than one set of data is added at a time.
+        _combos = [any((city_name, country_code, region_code)),
+                   any((latitude, longitude)),
+                   bool(ip),
+                   bool(host)]
+
+        if sum(_combos) > 1:
+            raise GeckoboardException(
+                "Too much data.  Add one point at a time."
+            )
+
+        _point = {}
+        if city_name is not None:
+            _point["city"] = {}
+            _point["city"]["city_name"] = city_name
+
+        if country_code is not None:
+            _point["city"]["country_code"] = country_code
+
+        if region_code is not None:
+            _point["city"]["region_code"] = region_code
+
+        if latitude is not None:
+            _point["latitude"] = latitude
+
+        if longitude is not None:
+            _point["longitude"] = longitude
+
+        if host is not None:
+            _point["host"] = host
+
+        if ip is not None:
+            _point["ip"] = ip
+
+        if color is not None:
+            _point["color"] = color
+
+        if size is not None:
+            _point["size"] = size
+
+        self.points.append(_point)
+
+    def _assemble_data(self, *args, **kwargs):
+        _data = {
+            "points": {
+                "point": self.points
+            }
+        }
+
+        self._assemble_payload(_data)
+
+
+class Monitoring(Widget):
+    def __init__(self, status=None, downTime=None, responseTime=None,
+                 *args, **kwargs):
+        super(Monitoring, self).__init__(*args, **kwargs)
+        self.status = status
+        self.downTime = downTime
+        self.responseTime = responseTime
+
+    def add_data(self, status, downTime=None, responseTime=None,
+                 *args, **kwargs):
+        if self.status is not None:
+            raise GeckoboardException("Widget already initialized")
+        else:
+            self.status = status
+
+        if downTime is not None:
+            self.downTime = downTime
+
+        if responseTime is not None:
+            self.responseTime = responseTime
+
+    def _assemble_data(self, *args, **kwargs):
+        _data = {
+            "status": self.status
+        }
+
+        if self.downTime is not None:
+            _data["downTime"] = self.downTime
+
+        if self.responseTime is not None:
+            _data["responseTime"] = self.responseTime
+
+        self._assemble_payload(_data)
+
+
+class NumberAndSecondaryStat(Widget):
+    def __init__(self, *args, **kwargs):
+        super(NumberAndSecondaryStat, self).__init__(*args, **kwargs)
+
+    def add_data(self, *args, **kwargs):
+        pass
+
+    def add(self, *args, **kwargs):
+        pass
+
+    def _assemble_data(self, *args, **kwargs):
+        self._assemble_payload()
+
+
+class PieChart(Widget):
+    def __init__(self, *args, **kwargs):
+        super(PieChart, self).__init__(*args, **kwargs)
+
+    def add_data(self, *args, **kwargs):
+        pass
+
+    def add(self, *args, **kwargs):
+        pass
+
+    def _assemble_data(self, *args, **kwargs):
+        self._assemble_payload()
+
+
+class RAG(Widget):
+    def __init__(self, *args, **kwargs):
+        super(RAG, self).__init__(*args, **kwargs)
+
+    def add_data(self, *args, **kwargs):
+        pass
+
+    def add(self, *args, **kwargs):
+        pass
+
+    def _assemble_data(self, *args, **kwargs):
+        self._assemble_payload()
+
+
+class Text(Widget):
+    def __init__(self, *args, **kwargs):
+        super(Text, self).__init__(*args, **kwargs)
+
+    def add_data(self, *args, **kwargs):
+        pass
+
+    def add(self, *args, **kwargs):
+        pass
+
+    def _assemble_data(self, *args, **kwargs):
+        self._assemble_payload()

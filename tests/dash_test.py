@@ -22,7 +22,7 @@ def test_bar_chart():
 def test_bullet_graph():
     bullet_widget_key = widget_keys['bullet_widget_key']
     bullet = geckopush.BulletGraph(dashboard=d, widget_key=bullet_widget_key,)
-    '''
+
     bullet = geckopush.BulletGraph(dashboard=d,
                                    widget_key=bullet_widget_key,
                                    label='Test Bullet Graph',
@@ -39,7 +39,7 @@ def test_bullet_graph():
                                    sublabel="A test Bullet graph",
                                    projected_start='100',
                                    projected_end='900',
-                                   )'''
+                                   )
     bullet.add_data(
        label='Second Bullet Graph',
        axis=["0", "200", "400", "600", "800", "1000"],
@@ -159,6 +159,24 @@ def test_List():
     lt.push()
     print(lt.payload)
 
+
+def test_map():
+    map_widget_key = widget_keys["map_widget_key"]
+    mp = geckopush.Map(dashboard=d, widget_key=map_widget_key)
+    mp.add_data(city_name="New York", country_code="US", size="10")
+    mp.add_data(host="google.com")
+    mp.add_data(ip="46.228.47.115")
+    mp.add_data(latitude=22.434355, longitude=11.12345, size=5, color="#ffffff")
+    mp.push()
+
+def test_monitoring():
+    monitoring_widget_key = widget_keys["monitoring_widget_key"]
+    mo = geckopush.Monitoring(dashboard=d, widget_key=monitoring_widget_key)
+    mo.add_data(status="up", downTime="Never", responseTime= "123 ms")
+    mo.push()
+    print(mo.status)
+    print(mo.payload)
+
 if __name__ == '__main__':
     #test_bar_chart()
     #test_funnel()
@@ -170,4 +188,6 @@ if __name__ == '__main__':
     #test_line_chart_list()
     #test_line_chart_datetime()
     #test_line_chart_datetime2()
-    test_List()
+    #test_List()
+    #test_map()
+    test_monitoring()
