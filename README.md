@@ -39,6 +39,7 @@ That's it, you've push some data to your geckoboard widget!
 
 
 *Note: you can declare your data while initializing your widget or afterwards using the .add_data method.*
+
     bar_chart = geckopush.BarChart(dashboard=d, widget_key=widget_key, data=[1,2,3,4,5]
 
     or
