@@ -128,7 +128,7 @@ def test_line_chart_datetime():
     linechart_widget_key = widget_keys["linechart_widget_key"]
     lc = geckopush.LineChart(dashboard=d,
                              widget_key=linechart_widget_key)
-    lc.add_data(name="data over time", data=[['2015-09-07', 400], ['2015-09-02', 500]])
+    lc.add_data(name="data over time", data=[['2015-09-07', 400], ['2015-09-02', 500]], series_type="secondary")
     lc.add(x_axis_type="datetime")
     #lc.add(y_axis_format="currency")
     #lc.add(y_axis_unit="EUR")
@@ -172,7 +172,7 @@ def test_map():
 def test_monitoring():
     monitoring_widget_key = widget_keys["monitoring_widget_key"]
     mo = geckopush.Monitoring(dashboard=d, widget_key=monitoring_widget_key)
-    mo.add_data(status="up", downTime="Never", responseTime= "123 ms")
+    mo.add_data(status="up", downtime="Never", responsetime= "123 ms")
     mo.push()
     print(mo.status)
     print(mo.payload)
@@ -186,8 +186,8 @@ if __name__ == '__main__':
     #test_leaderboard()
     #test_line_chart()
     #test_line_chart_list()
-    #test_line_chart_datetime()
+    test_line_chart_datetime()
     #test_line_chart_datetime2()
     #test_List()
     #test_map()
-    test_monitoring()
+    #test_monitoring()

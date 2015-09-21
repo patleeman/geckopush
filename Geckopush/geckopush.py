@@ -47,7 +47,7 @@ class Widget(object):
 
     def __repr__(self):
         print("<Geckopush Object (D: {}; WK: {}>".format(self.dashboard,
-                                                        self.widget_key))
+                                                         self.widget_key))
 
     def _assemble_data(self, *args, **kwargs):
         pass
@@ -58,7 +58,7 @@ class Widget(object):
     def add_data(self, *args, **kwargs):
         raise GeckoboardException("Method has no effect in this widget")
 
-    def _assemble_payload(self, _data_module, *args, **kwargs):
+    def _assemble_payload(self, _data_module):
         self.payload["data"] = _data_module
 
     def push(self):
@@ -104,10 +104,14 @@ class BarChart(Widget):
     def add(self, x_axis_labels=None, x_axis_type=None, y_axis_format=None,
             y_axis_unit=None):
 
-        if x_axis_labels is not None: self.x_axis_labels = x_axis_labels
-        if x_axis_type is not None: self.x_axis_type = x_axis_type
-        if y_axis_format is not None: self.y_axis_format = y_axis_format
-        if y_axis_unit is not None: self.y_axis_unit = y_axis_unit
+        if x_axis_labels is not None:
+            self.x_axis_labels = x_axis_labels
+        if x_axis_type is not None:
+            self.x_axis_type = x_axis_type
+        if y_axis_format is not None:
+            self.y_axis_format = y_axis_format
+        if y_axis_unit is not None:
+            self.y_axis_unit = y_axis_unit
 
     def _assemble_data(self):
         if len(self.data) == 0:
@@ -159,22 +163,22 @@ class BulletGraph(Widget):
                           comparative, sublabel)
 
     def add(self, orientation=None, *args, **kwargs):
-        if orientation is not None: self.orientation = orientation
+        if orientation is not None:
+            self.orientation = orientation
 
     def add_data(self, label, axis, red_start, red_end, amber_start,
-            amber_end, green_start, green_end, measure_start, measure_end,
-            projected_start, projected_end, comparative, sublabel=None):
+                 amber_end, green_start, green_end, measure_start, measure_end,
+                 projected_start, projected_end, comparative, sublabel=None):
 
         if len(self.data) >= 4:
             raise GeckoboardException(
                 "Bullet Graphs support a maximum of 4 multiples."
             )
 
-        all_or_none = self._all_or_none(label, axis, red_start, red_end,
-                                        amber_start, amber_end, green_start,
-                                        green_end, measure_start, measure_end,
-                                        projected_start, projected_end,
-                                        comparative)
+        self._all_or_none(label, axis, red_start, red_end, amber_start,
+                          amber_end, green_start, green_end, measure_start,
+                          measure_end, projected_start, projected_end,
+                          comparative)
 
         _item_payload = {
                         "label": label,
@@ -201,9 +205,9 @@ class BulletGraph(Widget):
                                 "start": measure_start,
                                 "end": measure_end
                             },
-                        "projected": {
-                            "start": projected_start,
-                            "end": projected_end
+                            "projected": {
+                                "start": projected_start,
+                                "end": projected_end
                             }
                         },
                         "comparative": {
@@ -215,11 +219,11 @@ class BulletGraph(Widget):
 
         self.data.append(_item_payload)
 
-
-    def _all_or_none(self, label, axis, red_start, red_end, amber_start,
-                         amber_end, green_start, green_end, measure_start,
-                         measure_end, projected_start, projected_end,
-                         comparative):
+    @staticmethod
+    def _all_or_none(label, axis, red_start, red_end, amber_start,
+                     amber_end, green_start, green_end, measure_start,
+                     measure_end, projected_start, projected_end,
+                     comparative):
 
         # Check to make sure that all or none of the required fields are added
         _necessary = [label, axis, red_start, red_end, amber_start, amber_end,
@@ -228,10 +232,9 @@ class BulletGraph(Widget):
         _necessary_none = list(bool(item is None) for item in _necessary)
         _is_all_none = all(_necessary_none)
         _is_all_not_none = all(not x for x in _necessary_none)
-        if (_is_all_none == _is_all_not_none):
+        if _is_all_none == _is_all_not_none:
             raise GeckoboardException("Missing required data point(s).")
         return True
-
 
     def _assemble_data(self):
         _data = {
@@ -242,17 +245,17 @@ class BulletGraph(Widget):
 
         if len(_item) == 1:
             _data["item"] = _item[0]
-        elif len(_item) > 1 and len(_item) <= 4:
+        else:
             _data["item"] = _item
 
         self._assemble_payload(_data)
 
 
 class Funnel(Widget):
-    def __init__(self, value=None, label=None, type=None,
+    def __init__(self, value=None, label=None, funnel_type=None,
                  percentage=None, *args, **kwargs):
         super(Funnel, self).__init__(*args, **kwargs)
-        self.type = type
+        self.funnel_type = funnel_type
         self.percentage = percentage
         self.data = []
         if value is not None and label is not None:
@@ -277,8 +280,8 @@ class Funnel(Widget):
         _data = {
             "item": self.data
         }
-        if self.type is not None:
-            _data["type"] = self.type
+        if self.funnel_type is not None:
+            _data["type"] = self.funnel_type
 
         if self.percentage is not None:
             _data["percentage"] = self.percentage
@@ -347,9 +350,9 @@ class HighCharts(Widget):
 
 class Leaderboard(Widget):
     def __init__(self, label=None, value=None, previous_rank=None,
-                 format=None, unit=None, *args, **kwargs):
+                 number_format=None, unit=None, *args, **kwargs):
         super(Leaderboard, self).__init__(*args, **kwargs)
-        self.format = format
+        self.number_format = number_format
         self.unit = unit
         self.data = []
 
@@ -380,8 +383,8 @@ class Leaderboard(Widget):
         _data = {
             "items": self.data
         }
-        if self.format is not None:
-            _data["format"] = self.format
+        if self.number_format is not None:
+            _data["format"] = self.number_format
 
         if self.unit is not None:
             _data["unit"] = self.unit
@@ -391,7 +394,7 @@ class Leaderboard(Widget):
 
 class LineChart(Widget):
     def __init__(self, data=None, name=None, incomplete_from=None,
-                 type=None, x_axis_labels=None, x_axis_type=None,
+                 series_type=None, x_axis_labels=None, x_axis_type=None,
                  y_axis_format=None, y_axis_unit=None, *args, **kwargs):
         super(LineChart, self).__init__(*args, **kwargs)
         self.x_axis_labels = x_axis_labels
@@ -401,20 +404,25 @@ class LineChart(Widget):
         self.data = []
 
         if data is not None:
-            self.add_data(data, name, incomplete_from, type)
+            self.add_data(data, name, incomplete_from, series_type)
 
-    def add_data(self, data, name=None, incomplete_from=None, type=None,
+    def add_data(self, data, name=None, incomplete_from=None, series_type=None,
                  *args, **kwargs):
+        _series = {
+            "data": data
+        }
 
-        if data is not None and name is not None:
-            self.data.append({"data": data, "name": name})
-        elif data is not None and name is None:
-            self.data.append({"data": data})
-        if incomplete_from is not None: self.incomplete_from = incomplete_from
-        if type is not None: self.type = type
+        if name is not None:
+            _series["name"] = name
+        if series_type is not None:
+            _series["type"] = series_type
+        if incomplete_from is not None:
+            _series["incomplete_from"] = incomplete_from
+
+        self.data.append(_series)
 
     def add(self, x_axis_labels=None, x_axis_type=None, y_axis_format=None,
-             y_axis_unit=None):
+            y_axis_unit=None):
         if x_axis_labels is not None:
             self.x_axis_labels = x_axis_labels
         if x_axis_type is not None:
@@ -431,7 +439,8 @@ class LineChart(Widget):
         elif not all(not x for x in _is_pairs) and not all(_is_pairs):
             raise GeckoboardException("Can not mix pairs and lists.")
 
-    def _data_check(self, data):
+    @staticmethod
+    def _data_check(data):
         """
         Check whether data is an [x,y] array or as a list [x,y,z].
         """
@@ -508,11 +517,18 @@ class Map(Widget):
         super(Map, self).__init__(*args, **kwargs)
         self.points = []
 
-    def add_data(self, city_name=None, country_code=None,
-                 region_code=None, latitude=None, longitude=None, ip=None,
-                 host=None, color=None, size=None, *args, **kwargs):
+        self._data_check(city_name, country_code, region_code, latitude,
+                         longitude, ip, host)
 
-        #Checking if country code or region is provided but not city name
+        self.add_data(city_name, country_code, region_code, latitude,
+                      longitude, ip, host, color, size)
+
+    @staticmethod
+    def _data_check(city_name=None, country_code=None,
+                    region_code=None, latitude=None, longitude=None, ip=None,
+                    host=None):
+
+        # Checking if country code or region is provided but not city name
         if country_code or region_code is not None:
             if city_name is None:
                 raise GeckoboardException("Widget missing required data.")
@@ -531,6 +547,13 @@ class Map(Widget):
             raise GeckoboardException(
                 "Too much data.  Add one point at a time."
             )
+
+    def add_data(self, city_name=None, country_code=None,
+                 region_code=None, latitude=None, longitude=None, ip=None,
+                 host=None, color=None, size=None, *args, **kwargs):
+
+        self._data_check(city_name, country_code, region_code, latitude,
+                         longitude, ip, host)
 
         _point = {}
         if city_name is not None:
@@ -561,7 +584,10 @@ class Map(Widget):
         if size is not None:
             _point["size"] = size
 
-        self.points.append(_point)
+        # Need a check because __init__ pushes all parameters into this fn
+        # no matter if all values are None or populated
+        if len(_point) > 0:
+            self.points.append(_point)
 
     def _assemble_data(self, *args, **kwargs):
         _data = {
@@ -574,25 +600,25 @@ class Map(Widget):
 
 
 class Monitoring(Widget):
-    def __init__(self, status=None, downTime=None, responseTime=None,
+    def __init__(self, status=None, downtime=None, responsetime=None,
                  *args, **kwargs):
         super(Monitoring, self).__init__(*args, **kwargs)
         self.status = status
-        self.downTime = downTime
-        self.responseTime = responseTime
+        self.downTime = downtime
+        self.responseTime = responsetime
 
-    def add_data(self, status, downTime=None, responseTime=None,
+    def add_data(self, status, downtime=None, responsetime=None,
                  *args, **kwargs):
         if self.status is not None:
             raise GeckoboardException("Widget already initialized")
         else:
             self.status = status
 
-        if downTime is not None:
-            self.downTime = downTime
+        if downtime is not None:
+            self.downTime = downtime
 
-        if responseTime is not None:
-            self.responseTime = responseTime
+        if responsetime is not None:
+            self.responseTime = responsetime
 
     def _assemble_data(self, *args, **kwargs):
         _data = {
