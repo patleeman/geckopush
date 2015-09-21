@@ -1,4 +1,4 @@
-#Geckopush
+#Geckopush v 0.1.0-dev
 ###Easy to use python library for pushing data your custom Geckoboard widgets
 The goal behind this library is to make pushing data to your Geckoboard widgets quick and painless.
 
