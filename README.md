@@ -4,6 +4,10 @@ The goal behind this library is to make pushing data to your Geckoboard widgets 
 
 [Geckoboard API Docs](https://developer.geckoboard.com/)
 
+Install:
+    Todo: package for pypi
+    
+
 Quickstart:
 
 ```python
