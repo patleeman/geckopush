@@ -16,8 +16,8 @@ def test_bar_chart():
     bar.x_axis_labels = ["one", "two", "three"]
     bar.x_axis_type = "standard"
     bar.y_axis_format = "decimal"
-    bar.push()
-    print(bar.payload)
+    return bar.push()
+
 
 def test_bullet_graph():
     bullet_widget_key = widget_keys['bullet_widget_key']
@@ -56,9 +56,8 @@ def test_bullet_graph():
        projected_start='600',
        projected_end='900'
     )
-    print(bullet.data)
-    print(bullet.payload)
-    bullet.push()
+
+    return bullet.push()
 
 def test_funnel():
     funnel_widget_key = widget_keys['funnel_widget_key']
@@ -72,14 +71,14 @@ def test_funnel():
     fun.add_data(700, "That's my dk in a box")
     fun.add_data(800, "dk in a box, yeah.")
 
-    fun.push()
+    return fun.push()
 
 
 def test_geckometer():
     geckometer_widget_key = widget_keys['geckometer_widget_key']
     gm = geckopush.GeckoMeter(dashboard=d, widget_key=geckometer_widget_key,
                               item=26, min_value=0, max_value=50)
-    gm.push()
+    return gm.push()
 
 
 def test_highchart():
@@ -89,7 +88,7 @@ def test_highchart():
                          widget_key=highchart_widget_key,
                          highchart=highchart_str)
 
-    hc.push()
+    return hc.push()
 
 def test_leaderboard():
     leaderboard_widget_key = widget_keys["leaderboard_widget_key"]
@@ -100,7 +99,7 @@ def test_leaderboard():
     lb.add_data("Renaldo", 10, 6)
     lb.add_data("Barney", 0, 0)
     lb.add_data("Farnsworth", 1, 1)
-    lb.push()
+    return lb.push()
 
 
 def test_line_chart():
@@ -110,8 +109,8 @@ def test_line_chart():
     lc.add_data(data=[[1,2],[2,3],[3,5]], name="BonerJamz")
     lc.add_data(data=[[2,2], [3,4], [4,5]], name="Smooth")
 
-    lc.push()
-    pprint.pprint(lc.payload)
+    return lc.push()
+
 
 def test_line_chart_list():
     linechart_widget_key = widget_keys["linechart_widget_key"]
@@ -120,8 +119,8 @@ def test_line_chart_list():
     lc.add_data(data=[1,2,3,4,5], name="womp")
     lc.add_data(data=[2,5,5,1,1], name="omp")
     lc.add(x_axis_labels=['one', 'two', 'three', 'four', 'five'])
-    lc.push()
-    pprint.pprint(lc.payload)
+    return lc.push()
+
 
 
 def test_line_chart_datetime():
@@ -132,8 +131,8 @@ def test_line_chart_datetime():
     lc.add(x_axis_type="datetime")
     #lc.add(y_axis_format="currency")
     #lc.add(y_axis_unit="EUR")
-    lc.push()
-    pprint.pprint(lc.payload)
+    return lc.push()
+
 
 def test_line_chart_datetime2():
     linechart_widget_key = widget_keys["linechart_widget_key"]
@@ -145,8 +144,8 @@ def test_line_chart_datetime2():
     lc.add(x_axis_type="datetime")
     lc.add(y_axis_format="currency")
     lc.add(y_axis_unit="USD")
-    lc.push()
-    pprint.pprint(lc.payload)
+    return lc.push()
+
 
 
 def test_List():
@@ -156,8 +155,7 @@ def test_List():
     lt.add_data(text="stuff", name="HOT",
                 color="#ff2015", description="Something describes here")
 
-    lt.push()
-    print(lt.payload)
+    return lt.push()
 
 
 def test_map():
@@ -167,34 +165,41 @@ def test_map():
     mp.add_data(host="google.com")
     mp.add_data(ip="46.228.47.115")
     mp.add_data(latitude=22.434355, longitude=11.12345, size=5, color="#ffffff")
-    mp.push()
+    return mp.push()
 
 def test_monitoring():
     monitoring_widget_key = widget_keys["monitoring_widget_key"]
     mo = geckopush.Monitoring(dashboard=d, widget_key=monitoring_widget_key)
     mo.add_data(status="up", downtime="Never", responsetime= "123 ms")
-    mo.push()
-    print(mo.status)
-    print(mo.payload)
+    return mo.push()
 
 def pie_chart():
     piechart_widget_key = widget_keys["piechart_widget_key"]
     pi = geckopush.PieChart(dashboard=d, widget_key=piechart_widget_key)
     pi.add_data(100, "stuff", "13699c")
     pi.add_data(200, "boring", "198acd")
+    return pi.push()
 
+
+
+def test_all():
+    tests = [
+        test_bar_chart(),
+        test_funnel(),
+        test_bullet_graph(),
+        test_geckometer(),
+        test_highchart(),
+        test_leaderboard(),
+        test_line_chart(),
+        test_line_chart_list(),
+        test_line_chart_datetime(),
+        test_line_chart_datetime2(),
+        test_List(),
+        test_map(),
+        test_monitoring(),
+        ]
+
+    for item in tests:
+        
 
 if __name__ == '__main__':
-    #test_bar_chart()
-    #test_funnel()
-    #test_bullet_graph()
-    #test_geckometer()
-    #test_highchart()
-    #test_leaderboard()
-    #test_line_chart()
-    #test_line_chart_list()
-    test_line_chart_datetime()
-    #test_line_chart_datetime2()
-    #test_List()
-    #test_map()
-    #test_monitoring()

@@ -587,12 +587,12 @@ class Map(Widget):
         # Need a check because __init__ pushes all parameters into this fn
         # no matter if all values are None or populated
         if len(_point) > 0:
-            self.points.append(_point)
+            self.data.append(_point)
 
     def _assemble_data(self, *args, **kwargs):
         _data = {
             "points": {
-                "point": self.points
+                "point": self.data
             }
         }
 
@@ -667,21 +667,24 @@ class PieChart(Widget):
         if color is not None:
             _slice["color"] = color
 
-        self.item.append(_slice)
+        self.data.append(_slice)
 
     def _assemble_data(self, *args, **kwargs):
         _item = {
-            "item": self.item
+            "item": self.data
         }
         self._assemble_payload(_item)
 
 
 class RAG(Widget):
-    def __init__(self, text=None, value=None, prefix=None, reverse_type=None,
+    def __init__(self, text=None, value=None, prefix=None, reverse_type=None, color=None,
                  *args, **kwargs):
         super(RAG, self).__init__(*args, **kwargs)
         self.reverse_type = reverse_type
         self.data = [None, None, None]
+
+        if text is not None:
+            self.add_data(text, value, prefix, color=color)
 
     # Added color optional variable to facilitate placing the _color dict in
     # the right position.
