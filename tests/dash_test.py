@@ -177,6 +177,13 @@ def test_monitoring():
     print(mo.status)
     print(mo.payload)
 
+def pie_chart():
+    piechart_widget_key = widget_keys["piechart_widget_key"]
+    pi = geckopush.PieChart(dashboard=d, widget_key=piechart_widget_key)
+    pi.add_data(100, "stuff", "13699c")
+    pi.add_data(200, "boring", "198acd")
+
+
 if __name__ == '__main__':
     #test_bar_chart()
     #test_funnel()

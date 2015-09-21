@@ -46,7 +46,7 @@ class Widget(object):
                                                      self.widget_key))
 
     def __repr__(self):
-        print("<Geckopush Object (D: {}; WK: {}>".format(self.dashboard,
+        print("<Geckopush Object (Dasboard: {}; Widget Key: {}>".format(self.dashboard,
                                                          self.widget_key))
 
     def _assemble_data(self, *args, **kwargs):
@@ -515,7 +515,7 @@ class Map(Widget):
                  region_code=None, latitude=None, longitude=None, ip=None,
                  host=None, color=None, size=None, *args, **kwargs):
         super(Map, self).__init__(*args, **kwargs)
-        self.points = []
+        self.data = []
 
         self._data_check(city_name, country_code, region_code, latitude,
                          longitude, ip, host)
@@ -649,31 +649,94 @@ class NumberAndSecondaryStat(Widget):
 
 
 class PieChart(Widget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, value=None, label=None, color=None, *args, **kwargs):
         super(PieChart, self).__init__(*args, **kwargs)
+        self.data = []
 
-    def add_data(self, *args, **kwargs):
-        pass
+        if value and label is not None:
+            self.add_data(value, label, color)
+        else:
+            raise GeckoboardException("Widget missing required data.")
 
-    def add(self, *args, **kwargs):
-        pass
+    def add_data(self, value, label, color=None, *args, **kwargs):
+        _slice = {
+            "value": value,
+            "label": label
+        }
+
+        if color is not None:
+            _slice["color"] = color
+
+        self.item.append(_slice)
 
     def _assemble_data(self, *args, **kwargs):
-        self._assemble_payload()
+        _item = {
+            "item": self.item
+        }
+        self._assemble_payload(_item)
 
 
 class RAG(Widget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, text=None, value=None, prefix=None, reverse_type=None,
+                 *args, **kwargs):
         super(RAG, self).__init__(*args, **kwargs)
+        self.reverse_type = reverse_type
+        self.data = [None, None, None]
 
-    def add_data(self, *args, **kwargs):
-        pass
+    # Added color optional variable to facilitate placing the _color dict in
+    # the right position.
+    def add_data(self, text, value=None, prefix=None, color=None,
+                 *args, **kwargs):
+        if len(self.data) > 3:
+            raise GeckoboardException(
+                "This widget accepts a maximum of 3 items"
+            )
 
-    def add(self, *args, **kwargs):
-        pass
+        _color = {
+            "text": text,
+        }
+
+        if value is not None:
+            _color["value"] = value
+
+        if prefix is not None:
+            _color["prefix"] = prefix
+
+        # Place _color data in proper position.
+        if color is not None:
+            if color == "red":
+                self.data[0] = _color
+            elif color == "amber":
+                self.data[1] = _color
+            elif color == "green":
+                self.data[2] = _color
+            else:
+                GeckoboardException("Not a valid color")
+        else:
+            for i, item in enumerate(self.data):
+                if item is None:
+                    self.data[i] = _color
+                    break
+
+    def add(self, reverse_type=None, *args, **kwargs):
+        if reverse_type is not None:
+            self.reverse_type = reverse_type
 
     def _assemble_data(self, *args, **kwargs):
-        self._assemble_payload()
+        # Remove any None values in self.item before appending it to payload.
+        # If the value is omitted, the color will not be displayed.
+        for i, item in enumerate(self.data):
+            if item is None:
+                item[i] = {"text": ""}
+
+        _data = {
+            "item": self.data
+        }
+
+        if self.reverse_type is not None:
+            _data["type"] = self.reverse_type
+
+        self._assemble_payload(_data)
 
 
 class Text(Widget):
