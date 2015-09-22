@@ -156,13 +156,13 @@ To call data points, if a widget contains more than a single data point, you can
 # Widget Types and Parameters
 
 ### Bar Chart
-Parameter Name | Optional | Data Type | Notes | Instance Variable Name
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-data | no | list | list must contain integers | self.data
-x_axis_labels | yes | list | list must contain strings | self.x_axis_labels
-x_axis_type | yes | string | see Geckoboard API docs for parameters | self.x_axis_type
-y_axis_format | yes | string | see Geckoboard API docs for parameters | self.y_axis_format
-y_axis_unit | yes | string | see Geckoboard API docs for parameters | self.y_axis_unit
+data | no | list | self.data |  list must contain integers 
+x_axis_labels | yes | list | self.x_axis_labels | list must contain strings
+x_axis_type | yes | string | self.x_axis_type | see Geckoboard API docs for parameters
+y_axis_format | yes | string |self.y_axis_format | see Geckoboard API docs for parameters 
+y_axis_unit | yes | string | self.y_axis_unit | see Geckoboard API docs for parameters 
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
@@ -172,7 +172,11 @@ self.push() | |
 
 
 ### Bullet Graph
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
 
 ### Funnel
 
