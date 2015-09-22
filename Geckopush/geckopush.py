@@ -1,3 +1,9 @@
+"""
+Geckopush was built for Python 3 and will most likely not work with Python 2.
+Author: Patrick Lee (me@patricklee.nyc)
+Git Repo: http://www.github.com/patleeman/geckopush
+"""
+
 import urllib.request
 import json
 
@@ -46,8 +52,10 @@ class Widget(object):
                                                      self.widget_key))
 
     def __repr__(self):
-        print("<Geckopush Object (Dasboard: {}; Widget Key: {}>".format(self.dashboard,
-                                                         self.widget_key))
+        print("<Geckopush Object (Dasboard: {}; Widget Key: {}>".format(
+            self.dashboard,
+            self.widget_key
+        ))
 
     def _assemble_data(self, *args, **kwargs):
         pass
@@ -75,13 +83,18 @@ class Widget(object):
             _response = urllib.request.urlopen(_request)
             _api_status = json.loads(_response.read().decode('utf-8'))
             print("API Success: {}".format(_api_status["success"]))
+            return True
 
         except urllib.request.HTTPError as e:
             print(e)
+            return False
 
 
 class GeckoboardException(Exception):
     pass
+
+
+# The following subclasses all inherit from the Widget superclass.
 
 
 class BarChart(Widget):
@@ -99,11 +112,14 @@ class BarChart(Widget):
             self.add_data(data=data)
 
     def add_data(self, data, *args, **kwargs):
-        self.data.append({"data": data})
+        self.data.append(
+            {
+                "data": data
+            }
+        )
 
     def add(self, x_axis_labels=None, x_axis_type=None, y_axis_format=None,
             y_axis_unit=None):
-
         if x_axis_labels is not None:
             self.x_axis_labels = x_axis_labels
         if x_axis_type is not None:
@@ -152,8 +168,11 @@ class BulletGraph(Widget):
         _necessary = [label, axis, red_start, red_end, amber_start, amber_end,
                       green_start, green_end, measure_start, measure_end,
                       projected_start, projected_end, comparative]
-        # Check if any of the required elements is None (not entered)
+
+        # Check if any of the _necessary elements are None (not entered)
         _necessary_none = list(bool(item is None) for item in _necessary)
+
+        # is True if all elements of _necessary_none are True.
         _is_all_none = all(_necessary_none)
 
         if not _is_all_none:
@@ -224,7 +243,10 @@ class BulletGraph(Widget):
                      amber_end, green_start, green_end, measure_start,
                      measure_end, projected_start, projected_end,
                      comparative):
-
+        """
+        Method to check if all the required elements are supplied, otherwise
+        raise an exception.
+        """
         # Check to make sure that all or none of the required fields are added
         _necessary = [label, axis, red_start, red_end, amber_start, amber_end,
                       green_start, green_end, measure_start, measure_end,
@@ -527,6 +549,10 @@ class Map(Widget):
     def _data_check(city_name=None, country_code=None,
                     region_code=None, latitude=None, longitude=None, ip=None,
                     host=None):
+        """
+        Method to check whether the right combinations of values have been
+        submitted, otherwise raise an error.
+        """
 
         # Checking if country code or region is provided but not city name
         if country_code or region_code is not None:
@@ -635,17 +661,61 @@ class Monitoring(Widget):
 
 
 class NumberAndSecondaryStat(Widget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, primary_value=None, secondary_value=None, text=None,
+                 prefix=None, metric_type=None, absolute=None,
+                 *args, **kwargs):
         super(NumberAndSecondaryStat, self).__init__(*args, **kwargs)
+        self.metric_type = metric_type
+        self.absolute = absolute
+        self.data = []
+        if primary_value is not None:
+            self.add_data(primary_value, secondary_value, text, prefix)
 
-    def add_data(self, *args, **kwargs):
-        pass
+    def add_data(self, primary_value, secondary_value=None, text=None,
+                 prefix=None, *args, **kwargs):
 
-    def add(self, *args, **kwargs):
-        pass
+        if secondary_value is None and text is not None:
+            _item = {
+                "value": primary_value
+            }
+            if text is not None:
+                _item["text"] = text
+            if prefix is not None:
+                _item["prefix"] = prefix
+            self.data.append(_item)
+
+        elif secondary_value is not None and text is None:
+            _item_1 = {
+                "value": primary_value
+            }
+            self.data.append(_item_1)
+            _item_2 = {
+                "value": secondary_value
+            }
+            self.data.append(_item_2)
+
+        else:
+            raise GeckoboardException(
+                "Widget accepts text or a secondary value only."
+            )
+
+    def add(self, metric_type=None, absolute=None, *args, **kwargs):
+        if metric_type is not None:
+            self.metric_type = metric_type
+        if absolute is not None:
+            self.absolute = absolute
 
     def _assemble_data(self, *args, **kwargs):
-        self._assemble_payload()
+        _data = {
+            "item": self.data
+        }
+        if self.metric_type is not None:
+            _data["type"] = self.metric_type
+
+        if self.absolute is not None:
+            _data["absolute"] = self.absolute
+
+        self._assemble_payload(_data)
 
 
 class PieChart(Widget):
@@ -653,10 +723,8 @@ class PieChart(Widget):
         super(PieChart, self).__init__(*args, **kwargs)
         self.data = []
 
-        if value and label is not None:
+        if value is not None and label is not None:
             self.add_data(value, label, color)
-        else:
-            raise GeckoboardException("Widget missing required data.")
 
     def add_data(self, value, label, color=None, *args, **kwargs):
         _slice = {
@@ -743,14 +811,30 @@ class RAG(Widget):
 
 
 class Text(Widget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, text=None, text_type=None, *args, **kwargs):
         super(Text, self).__init__(*args, **kwargs)
+        self.data = []
 
-    def add_data(self, *args, **kwargs):
-        pass
+        if text is not None:
+            self.add_data(text, text_type)
 
-    def add(self, *args, **kwargs):
-        pass
+    def add_data(self, text, text_type=None, *args, **kwargs):
+        _item = {
+            "text": text
+        }
+        if type is not None:
+            _item["type"] = text_type
+
+        self.data.append(_item)
 
     def _assemble_data(self, *args, **kwargs):
-        self._assemble_payload()
+        if len(self.data) > 10:
+            raise GeckoboardException("Text accepts a max of 10 items.")
+        elif len(self.data) == 0:
+            raise GeckoboardException("Must provide at least one item")
+
+        _data = {
+            "item": self.data
+        }
+
+        self._assemble_payload(_data)
