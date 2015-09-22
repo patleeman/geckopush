@@ -5,7 +5,7 @@ Geckopush makes pushing data to your Geckoboard.com custom widgets painless.  It
 For Geckoboard specific custom widget information, please refer to the developer docs.
 [Geckoboard API Docs](https://developer.geckoboard.com/)
 
-Installation:
+##Installation:
 
 For now, Git Clone the repo to your local machine.
 
@@ -14,7 +14,7 @@ For now, Git Clone the repo to your local machine.
 *Coming soon: Pypi package.*
 
 
-Quickstart:
+##Quickstart:
 
 ```python
 from Geckopush import geckopush
@@ -153,9 +153,22 @@ To retrieve the valuse, call
 To call data points, if a widget contains more than a single data point, you can call widget.data which will return a list with the formatted data points already initialized.
 
 
-# Widgets
+# Widget Types and Parameters
 
 ### Bar Chart
+Parameter Name | Optional | Data Type | Notes | Instance Variable Name
+:---------------|:----------|:-----------|:--------|:----------------------
+data | no | list | list must contain integers | self.data
+x_axis_labels | yes | list | list must contain strings | self.x_axis_labels
+x_axis_type | yes | string | see Geckoboard API docs for parameters | self.x_axis_type
+y_axis_format | yes | string | see Geckoboard API docs for parameters | self.y_axis_format
+y_axis_unit | yes | string | see Geckoboard API docs for parameters | self.y_axis_unit
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | data |
+self.add() | x_axis_labels, x_axis_type, y_axis_format, y_axis_unit | 
+self.push() | |
 
 
 ### Bullet Graph
