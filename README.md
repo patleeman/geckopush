@@ -2,8 +2,9 @@
 ###Easy to use python library for pushing data your custom Geckoboard widgets.
 Geckopush makes pushing data to your Geckoboard.com custom widgets painless.  It handles structuring your widgets' JSON, request, and subsequent push to Geckoboard's servers.  It takes the difficult work out of getting your custom data to your dashboard.
 
+
 For Geckoboard specific custom widget information, please refer to the developer docs.
-[Geckoboard API Docs](https://developer.geckoboard.com/)
+###[Geckoboard API Docs](https://developer.geckoboard.com/)
 
 ##Installation:
 
@@ -47,7 +48,7 @@ from Geckopush import geckopush
 That's it, you've push some data to your geckoboard widget!
 
 
-*Note: you can declare your data while initializing your widget or afterwards using the .add_data method.*
+*Note: you can declare your first set of data while initializing your widget or afterwards using the .add_data method.*
 
     >>> bar_chart = geckopush.BarChart(dashboard=d, widget_key=widget_key, data=[1,2,3,4,5]
 
@@ -126,17 +127,20 @@ Notes:
 * Widget layer: This layer contains your custom widgets' data including which dashboard it belongs to and its widget key.  This object holds the relevant data points and methods to construct and POST your JSON payload.
     
     ```python
-    >>> widget = geckopush.Text(dashboard=d, widget_key="Widget-Key-Goes-Here")
+    >>> widget = geckopush.LineChart(dashboard=d, widget_key="Widget-Key-Goes-Here")
     ```
     
 * Data layer: This is the data payload that you push to Geckoboard's servers.  This contains the JSON payload in a specific structure as laid out in the Geckoboard API Docs.  Each widget has a slightly different payload scheme and must be configured very specifically in order to successfully complete your POST request.
 
     ```python
     # Adding a parameter to your widget (note: the text widget does not contain any parameters, calling .add will raise an exception on this widget.)
-    >>> widget.add(param="example")
+    >>> lc.add(x_axis_type="datetime")
+    >>> lc.add(y_axis_format="currency")
+    >>> lc.add(y_axis_unit="USD")
     
     # Adding a data point to your widget
-    >>> widget.add_data(text="This is a message to display on your widget", text_type=2)
+    >>> lc.add_data(name="One", data=[400, 500, 900, 900, 1000])
+    >>> lc.add_data(name="Two", data=[1000, 900, 800, 200, 100])
     ```
 
 The data layer is split into two types of data:
@@ -144,75 +148,368 @@ The data layer is split into two types of data:
 * data points (added to your widget with the .add_data() method)
 
 This distinction affects how one accesses Geckopush's interface.  For widget attributes, you can usually call an attribute after setting it with .add.  
-To retrieve the valuse, call 
+To retrieve the values, call 
 
     >>> widget.attribute_name
-    ex:
-    >>> 
+    ex: 
+    >>> lc.x_axis_type
+    "datetime"
 
 To call data points, if a widget contains more than a single data point, you can call widget.data which will return a list with the formatted data points already initialized.
 
 
 # Widget Types and Parameters
+### Universal Instance Variables and Methods
+
+All widgets inherit from a base Widget class which have methods and instance variables that are accessable from all widget subclasses.
+
+Widget Class Variable/Methods | Notes
+------------------------------|--------
+self.dashboard | Stores the reference to the dashboard object
+self.api_key | Stores the dashboard api_key
+self.widget | Stores the widget key associated with the widget
+self.payload | The final JSON payload that is assembled during the push operation.
+self.push() | Push method which assembles the payload, forms the POST request, and pushs the data to Geckoboard's servers.
+
+If you wanted to see the structure of the final JSON after executing the .push() method, call self.payload.
+
+
 
 ### Bar Chart
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
 data | no | list | self.data |  list must contain integers 
 x_axis_labels | yes | list | self.x_axis_labels | list must contain strings
-x_axis_type | yes | string | self.x_axis_type | see Geckoboard API docs for parameters
-y_axis_format | yes | string |self.y_axis_format | see Geckoboard API docs for parameters 
-y_axis_unit | yes | string | self.y_axis_unit | see Geckoboard API docs for parameters 
+x_axis_type | yes | string | self.x_axis_type | 
+y_axis_format | yes | string |self.y_axis_format | 
+y_axis_unit | yes | string | self.y_axis_unit | 
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
-self.add_data() | data |
+self.add_data() | data | variables stored in self.data
 self.add() | x_axis_labels, x_axis_type, y_axis_format, y_axis_unit | 
-self.push() | |
+
+######Example:
+
+```python
+bar = geckopush.BarChart(dashboard=d, widget_key=bar_widget_key, data=[1,2,3,4,5,6,7,8,9,10])
+bar.x_axis_labels = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+bar.x_axis_type = "standard"
+bar.y_axis_format = "decimal"
+bar.y_axis_unit = "USD"
+bar.push()
+```
 
 
 ### Bullet Graph
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
+orientation | yes | string | self.orientation |
+label | no | string | | stored in self.data
+axis | no | list | list must contain strings | 
+red_start | no | integer | | stored in self.data
+red_end | no | integer | | stored in self.data
+amber_start | no | integer | | stored in self.data
+amber_end | no | integer | | stored in self.data
+green_start | no | integer | | stored in self.data
+green_end | no | integer | | stored in self.data
+measure_start | no | string | | stored in self.data
+measure_end | no | string | | stored in self.data
+projected_start | no | string | | stored in self.data
+projected_end | no | string | | stored in self.data
+comparative | no | string | | stored in self.data
+sublabel | yes | string | | stored in self.data
+
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | label, axis, red_start, red_end, amber_start,  amber_end, green_start, green_end, measure_start, measure_end, projected_start, projected_end, comparative, sublabel | 
+self.add() | orientation | 
+
+######Example:
+
+```python
+bullet = geckopush.BulletGraph(dashboard=d,
+                               widget_key=bullet_widget_key,
+                               label='Test Bullet Graph',
+                               axis=["0", "200", "400", "600", "800", "1000"],
+                               comparative="200",
+                               measure_start="0",
+                               measure_end="500",
+                               red_start=0,
+                               red_end=100,
+                               amber_start=101,
+                               amber_end=600,
+                               green_start=601,
+                               green_end=1000,
+                               sublabel="A test Bullet graph",
+                               projected_start='100',
+                               projected_end='900',
+                               )
+bullet.add_data(
+   label='Second Bullet Graph',
+   axis=["0", "200", "400", "600", "800", "1000"],
+   comparative="100",
+   measure_start="0",
+   measure_end="800",
+   red_start=0,
+   red_end=200,
+   amber_start=201,
+   amber_end=300,
+   green_start=301,
+   green_end=1000,
+   sublabel="womp womp womp",
+   projected_start='600',
+   projected_end='900'
+)
+bullet.push()
+```
+
+
+### Funnel
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+value | no | string | | stored in self.data
+label | no | string | | stored in self.data
+funnel_type | yes | string | self.funnel_type | 
+percentage | yes | string | self.percentage |
+
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | value, label | 
+
+######Example:
+
+```python
+fun = geckopush.Funnel(dashboard=d, widget_key=funnel_widget_key)
+fun.add_data(100, "one hundred")
+fun.add_data(200, "two hundred")
+fun.add_data(300, "three hundred")
+fun.add_data(400, "four hundred")
+fun.add_data(500, "five hundred")
+fun.add_data(600, "six hundred")
+fun.add_data(700, "seven hundred")
+fun.add_data(800, "eight hundred")
+
+fun.push()
+```
+
+### Geck-o-meter
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+item | no | integer | self.item | 
+min_value | no | integer | self.min_value |
+max_value | no | integer | self.max_value | 
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | item, min_value, max_value | 
+
+######Example:
+
+```python
+gm = geckopush.GeckoMeter(dashboard=d, widget_key=geckometer_widget_key,
+                          item=26, min_value=0, max_value=50)
+gm.push()
+```
+
+### Highcharts
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+highchart | no | string | self.highchart | highchart code must be within a string
+
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | highchart | 
+
+######Example:
+
+```python
+    highchart_str = "<HighCharts String>"
+    hc = geckopush.HighCharts(dashboard=d,
+                         widget_key=highchart_widget_key,
+                         highchart=highchart_str)
+    hc.push()
+```
+
+
+### Leaderboard
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+label | no | string | | stored in self.data
+value | yes | integer |  | stored in self.data
+previous_rank | yes | string | | stored in self.data
+number_format | yes | string | self.number_format |
+unit | yes | string | self.unit |
+
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+self.add_data() | label, value, previous_rank | Widget accepts a max of 22 labels.
+
+######Example:
+
+```python
+lb = geckopush.Leaderboard(dashboard=d, widget_key=leaderboard_widget_key)
+lb.add_data("Jack", 100, 200)
+lb.add_data("Bob", 50, 50)
+lb.add_data("Renaldo", 100, 20)
+lb.add_data("Barney", 0, 0)
+lb.add_data("Farnsworth", 96, 4)
+lb.push()
+```
+
+### Line Chart
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
 
-### Funnel
+######Example:
 
-
-### Geck-o-meter
-
-
-### Highcharts
-
-
-### Leaderboard
-
-
-### Line Chart
-
+```python
+lc = geckopush.LineChart(dashboard=d, widget_key=linechart_widget_key)
+lc.add_data(name="One", data=[400, 500, 900, 900, 1000])
+lc.add_data(name="Two", data=[1000, 900, 800, 200, 100])
+lc.add(x_axis_labels=["2015-10-01", "2015-10-02", "2015-10-03", "2015-10-04", "2015-10-06"])
+lc.add(x_axis_type="datetime")
+lc.add(y_axis_format="currency")
+lc.add(y_axis_unit="USD")
+lc.push()
+```
 
 ### List
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+lt = geckopush.List(dashboard=d,
+                    widget_key=lst_widget_key)
+lt.add_data(text="12345", name="numbers",
+            color="#ff2015", description="These are numbers")
+lt.add_data(text="abcde", name="letters", color= "#ffffff", description="These are letters")
+lt.push()
+```
 
 ### Map
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+mp = geckopush.Map(dashboard=d, widget_key=map_widget_key)
+mp.add_data(city_name="New York", country_code="US", size="10")
+mp.add_data(host="google.com")
+mp.add_data(ip="46.228.47.115")
+mp.add_data(latitude=22.434355, longitude=11.12345, size=5, color="#ffffff")
+mp.push()
+```
 
 ### Monitoring
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
 
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+monitoring_widget_key = WIDGET_KEYS["monitoring_widget_key"]
+mo = geckopush.Monitoring(dashboard=d, widget_key=monitoring_widget_key)
+mo.add_data(status="up", downtime="Never", responsetime= "123 ms")
+mo.push()
+```
 
 ### Number and Secondary Stat
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
 
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
+ns.add_data(primary_value=15, secondary_value=25)
+ns.push()
+
+or 
+
+ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
+ns.add_data(primary_value=15, text="Hola Amigo")
+ns.push()
+```
 
 ### Pie Chart
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
 
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+pi = geckopush.PieChart(dashboard=d, widget_key=piechart_widget_key)
+pi.add_data(100, "Slice 1", "13699c")
+pi.add_data(200, "Slice 2", "198acd")
+pi.push()
+```
 
 ### RAG
+Push to both RAG Number and RAG Column widgets
+
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
 
 
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+rg = geckopush.RAG(dashboard=d, widget_key=widget_key)
+rg.add_data(text="One", value=50, prefix="$", color="green")
+rg.add_data(text="Two", value=100, prefix="$", color="amber")
+rg.add_data(text="Three", value=150, prefix="$", color="red")
+rg.push()
+```
 
 ### Text
+Parameter Name | Optional | Data Type | Instance Variable Name | Notes
+:---------------|:----------|:-----------|:--------|:----------------------
+
+
+Instance Methods | Accepts Parameters | Notes
+:--------------- | :----------------- | :-----
+
+######Example:
+
+```python
+rg = geckopush.Text(dashboard=d, widget_key=widget_key)
+rg.add_data(text="Hello There My Friend", type=0)
+rg.add_data(text="How are you doing?", type=1)
+rg.push()
+```
+
