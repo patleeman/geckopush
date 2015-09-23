@@ -687,13 +687,23 @@ class NumberAndSecondaryStat(Widget):
 
         elif secondary_value is not None and text is None:
             _item_1 = {
-                "value": primary_value
-            }
+                    "value": primary_value
+                }
             self.data.append(_item_1)
-            _item_2 = {
-                "value": secondary_value
-            }
-            self.data.append(_item_2)
+
+            # Check if secondary value is an integer or float
+            if isinstance(secondary_value, int) or \
+                    isinstance(secondary_value, float):
+
+                _item_2 = {
+                    "value": secondary_value
+                }
+                self.data.append(_item_2)
+
+            # Check if the secondary value is a list and attach as an array as
+            # per geckoboard api docs.
+            elif isinstance(secondary_value,list):
+                self.data.append(secondary_value)
 
         else:
             raise GeckoboardException(

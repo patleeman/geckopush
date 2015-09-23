@@ -215,6 +215,16 @@ def test_number_and_secondary_stat_2():
     else:
         return False
 
+def test_number_and_secondary_stat_3():
+    widget_key = WIDGET_KEYS["number_and_secondary_stat_widget_key_2"]
+    ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
+    ns.add_data(primary_value=15, secondary_value=[12345, 12345, 15555, 12345, 12322])
+    ret = ns.push()
+    if ret:
+        return True
+    else:
+        return False
+
 def test_rag_numbers():
     widget_key = WIDGET_KEYS["RAG_numbers_widget_key"]
     rg = geckopush.RAG(dashboard=d, widget_key=widget_key)
@@ -265,6 +275,7 @@ if __name__ == '__main__':
         test_pie_chart,
         test_number_and_secondary_stat_1,
         test_number_and_secondary_stat_2,
+        test_number_and_secondary_stat_3,
         test_rag_numbers,
         test_rag_columns,
         test_text
