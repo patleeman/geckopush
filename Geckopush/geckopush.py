@@ -57,6 +57,9 @@ class Widget(object):
             self.widget_key
         ))
 
+    def _assemble_payload(self, _data_module):
+        self.payload["data"] = _data_module
+
     def _assemble_data(self, *args, **kwargs):
         pass
 
@@ -65,9 +68,6 @@ class Widget(object):
 
     def add_data(self, *args, **kwargs):
         raise GeckoboardException("Method has no effect in this widget")
-
-    def _assemble_payload(self, _data_module):
-        self.payload["data"] = _data_module
 
     def push(self):
         self._assemble_data()
@@ -89,14 +89,15 @@ class Widget(object):
             print(e)
             return False
 
+    def payload(self):
+        self._assemble_data()
+        return self.payload
 
 class GeckoboardException(Exception):
     pass
 
 
 # The following subclasses all inherit from the Widget superclass.
-
-
 class BarChart(Widget):
     def __init__(self, data=None, x_axis_labels=None,
                  x_axis_type=None, y_axis_format=None, y_axis_unit=None,

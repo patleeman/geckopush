@@ -168,8 +168,8 @@ Widget Class Variable/Methods | Notes
 self.dashboard | Stores the reference to the dashboard object
 self.api_key | Stores the dashboard api_key
 self.widget | Stores the widget key associated with the widget
-self.payload | The final JSON payload that is assembled during the push operation.
-self.push() | Push method which assembles the payload, forms the POST request, and pushs the data to Geckoboard's servers.
+self.payload() | Method which assembles the payload and returns it.
+self.push() | Method which assembles the payload, forms the POST request, and pushs the data to Geckoboard's servers.
 
 If you wanted to see the structure of the final JSON after executing the .push() method, call self.payload.
 
