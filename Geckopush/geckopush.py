@@ -89,9 +89,10 @@ class Widget(object):
             print(e)
             return False
 
-    def payload(self):
+    def get_payload(self):
         self._assemble_data()
         return self.payload
+
 
 class GeckoboardException(Exception):
     pass
@@ -631,8 +632,8 @@ class Monitoring(Widget):
                  *args, **kwargs):
         super(Monitoring, self).__init__(*args, **kwargs)
         self.status = status
-        self.downTime = downtime
-        self.responseTime = responsetime
+        self.downtime = downtime
+        self.responsetime = responsetime
 
     def add_data(self, status, downtime=None, responsetime=None,
                  *args, **kwargs):
@@ -642,21 +643,21 @@ class Monitoring(Widget):
             self.status = status
 
         if downtime is not None:
-            self.downTime = downtime
+            self.downtime = downtime
 
         if responsetime is not None:
-            self.responseTime = responsetime
+            self.responsetime = responsetime
 
     def _assemble_data(self, *args, **kwargs):
         _data = {
             "status": self.status
         }
 
-        if self.downTime is not None:
-            _data["downTime"] = self.downTime
+        if self.downtime is not None:
+            _data["downTime"] = self.downtime
 
-        if self.responseTime is not None:
-            _data["responseTime"] = self.responseTime
+        if self.responsetime is not None:
+            _data["responseTime"] = self.responsetime
 
         self._assemble_payload(_data)
 
@@ -702,7 +703,7 @@ class NumberAndSecondaryStat(Widget):
 
             # Check if the secondary value is a list and attach as an array as
             # per geckoboard api docs.
-            elif isinstance(secondary_value,list):
+            elif isinstance(secondary_value, list):
                 self.data.append(secondary_value)
 
         else:
@@ -756,8 +757,8 @@ class PieChart(Widget):
 
 
 class RAG(Widget):
-    def __init__(self, text=None, value=None, prefix=None, reverse_type=None, color=None,
-                 *args, **kwargs):
+    def __init__(self, text=None, value=None, prefix=None, reverse_type=None,
+                 color=None, *args, **kwargs):
         super(RAG, self).__init__(*args, **kwargs)
         self.reverse_type = reverse_type
         self.data = [None, None, None]

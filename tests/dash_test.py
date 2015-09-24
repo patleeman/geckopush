@@ -21,6 +21,7 @@ def test_bar_chart():
     bar.y_axis_format = "decimal"
     bar.y_axis_unit = "USD"
     ret = bar.push()
+    bar.get_payload()
     if ret:
         return True
     else:

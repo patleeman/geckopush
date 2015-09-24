@@ -168,7 +168,7 @@ Widget Class Variable/Methods | Notes
 self.dashboard | Stores the reference to the dashboard object
 self.api_key | Stores the dashboard api_key
 self.widget | Stores the widget key associated with the widget
-self.payload() | Method which assembles the payload and returns it.
+self.get_payload() | Method which assembles the payload and returns it.  The payload is not assembled until either this method or push() is called.
 self.push() | Method which assembles the payload, forms the POST request, and pushs the data to Geckoboard's servers.
 
 If you wanted to see the structure of the final JSON after executing the .push() method, call self.payload.
@@ -364,10 +364,19 @@ lb.push()
 ### Line Chart
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+data | no | list | | stored in self.data
+name | yes | string | | stored in self.data
+incomplete_from | yes | string | | stored in self.data 
+series_type | yes | string | | stored in self.data
+x_axis_labels | yes | list | self.x_axis_labels | list must contain strings
+x_axis_type | yes | string | self.x_axis_type | 
+y_axis_format | yes | string | self.y_axis_format |
+y_axis_unit | yes | string | self.y_axis_unit |
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | data, name, incomplete_from, series_type | 
+self.add() | x_axis_labels, x_axis_type, y_axis_format, y_axis_unit | 
 
 ######Example:
 
@@ -385,10 +394,14 @@ lc.push()
 ### List
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+text | no | string | | stored in self.data
+name | yes | string | | stored in self.data
+color | yes | string | | stored in self.data
+description | yes | string | | stored in self.data
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | text, name, color, description | 
 
 ######Example:
 
@@ -404,10 +417,20 @@ lt.push()
 ### Map
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+city_name | | string | | stored in self.data
+country_code | | string | | stored in self.data
+region_code | | string | | stored in self.data
+latitude | | float | | stored in self.data
+longitude | | float | | stored in self.data
+ip | | string | | stored in self.data
+host | | string | | stored in self.data
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | city_name, country_code, region_code, latitude, longitude, ip, host | 
+
+When adding a map point, the method checks whether the correct set of variables are input.  For example, you can only call city_name, country_code, and region_code in the same add_data() call.  If you try to mix city_name and longitude, the method will raise an error.  The method also checks if both a text and secondary value are supplied and raises an error if so.
+
 
 ######Example:
 
@@ -423,10 +446,14 @@ mp.push()
 ### Monitoring
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+status | no | string | self.status | accepts "up" or "down"
+downtime | yes | string | self.downtime |
+responsetime | yes | string | self.responsetime |
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | status, downtime, responsetime |
+
 
 ######Example:
 
@@ -440,10 +467,19 @@ mo.push()
 ### Number and Secondary Stat
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+primary_value | no | int, float | | stored in self.data
+secondary_value | yes | int, float, list | | stored in self.data.  list must contain integers or floats
+text | yes | string | | stored in self.data
+prefix | yes | string | | stored in self.data
+metric_type | yes | string | self.metric_type |
+absolute | yes | string | self.absolute
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | primary_value, secondary_value, text, prefix |
+self.add() | metric_type, absolute | 
+
+The add_data() method checks whether the secondary_value is a single number or a list of numbers for use in a line chart to be displayed underneath the primary number.
 
 ######Example:
 
@@ -457,15 +493,24 @@ or
 ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
 ns.add_data(primary_value=15, text="Hola Amigo")
 ns.push()
+
+of
+
+ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
+ns.add_data(primary_value=15, secondary_value=[5,10,15,20])
+ns.push()
 ```
 
 ### Pie Chart
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+value | no | int, float? | | stored in self.data
+label | no | string | | stored in self.data
+color | yes | string | | stored in self.data
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | value, label, color |
 
 ######Example:
 
@@ -476,15 +521,23 @@ pi.add_data(200, "Slice 2", "198acd")
 pi.push()
 ```
 
-### RAG
-Push to both RAG Number and RAG Column widgets
+### RAG (Red, Amber, Green)
+Push to both RAG Number and RAG Column widgets.
 
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+text | no | string | | stored in self.data
+value | yes | integer | | stored in self.data
+prefix | yes | string | | stored in self.data
+reverse_type | yes | self.reverse_type | API only accepts "reverse" string
+color | yes | string | | Accepts "red", "amber" or "green" only
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | text, value, prefix | 
+self.add() | reverse_type |
+
+*Color: The Geckoboard API detects color assignment to Red, Amber or Green through the positioning of the text/value/prefix payloads.  This optional parameter allows you to specify the exact color you want to assign the data to without having to declare your data points in order.  If omitted, the .add_data() method will assign it to the next unassigned color in the order from Red->Amber->Green.  
 
 ######Example:
 
@@ -492,17 +545,21 @@ Instance Methods | Accepts Parameters | Notes
 rg = geckopush.RAG(dashboard=d, widget_key=widget_key)
 rg.add_data(text="One", value=50, prefix="$", color="green")
 rg.add_data(text="Two", value=100, prefix="$", color="amber")
-rg.add_data(text="Three", value=150, prefix="$", color="red")
+rg.add_data(text="Three", value=150, prefix="$")  # Will be assigned to red automatically.
 rg.push()
 ```
 
 ### Text
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
-
+text | no | string | | stored in self.data
+text_type | yes | integer | | stored in self.data
 
 Instance Methods | Accepts Parameters | Notes
 :--------------- | :----------------- | :-----
+self.add_data() | text, text_type |
+
+This widget accepts a max of 10 text items.
 
 ######Example:
 
@@ -513,3 +570,6 @@ rg.add_data(text="How are you doing?", type=1)
 rg.push()
 ```
 
+
+
+For questions, issues, bugs please contact the author through github or email.
