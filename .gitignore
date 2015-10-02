@@ -58,3 +58,4 @@ target/
 
 #PyCharm
 .idea/
+/tests/gecko_settings.json

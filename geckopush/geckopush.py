@@ -1,5 +1,5 @@
 """
-Geckopush was built for Python 3 and will most likely not work with Python 2.
+Geckopush was built for Python 3.
 Author: Patrick Lee (me@patricklee.nyc)
 Git Repo: http://www.github.com/patleeman/geckopush
 """
@@ -52,7 +52,7 @@ class Widget(object):
                                                      self.widget_key))
 
     def __repr__(self):
-        print("<Geckopush Object (Dasboard: {}; Widget Key: {}>".format(
+        print("<geckopush Object (Dasboard: {}; Widget Key: {}>".format(
             self.dashboard,
             self.widget_key
         ))
@@ -82,12 +82,15 @@ class Widget(object):
         try:
             _response = urllib.request.urlopen(_request)
             _api_status = json.loads(_response.read().decode('utf-8'))
-            print("API Success: {}".format(_api_status["success"]))
-            return True
+            _name = str(self.__class__)
+            _name_truncated = _name[8:len(_name)-2]
+            print("API Success ({}): {}".format(_name_truncated,
+                                                _api_status["success"]))
+            return _api_status
 
         except urllib.request.HTTPError as e:
             print(e)
-            return False
+            return e
 
     def get_payload(self):
         self._assemble_data()

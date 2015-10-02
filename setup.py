@@ -1,9 +1,9 @@
 from distutils.core import setup
 
-setup(name='Geckopush',
-      packages=['Geckopush'],
-      version='0.1',
-      description="A library for geckoboard push functionality",
+setup(name='geckopush',
+      packages=['geckopush'],
+      version='0.2',
+      description="Easy to use python 3 library for pushing data your custom Geckoboard widgets",
       author="Patrick Lee",
       author_email="me@patricklee.nyc",
       url="http://www.github.com/patleeman/geckopush",

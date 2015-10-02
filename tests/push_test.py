@@ -1,10 +1,10 @@
 """
-This very basic test suite is a very quick and dirty way to test to see if all the widgets are working.
-This requires a file named geckoboard_push_settings with widget API keys located in the parent directory
-that geckopush shares.
+Push test that pushes actual data to widgets set up on a geckoboard dashboard.
+gecko_settings.json should contain the widget keys and api keys for corresponding
+widgets.
 """
 
-from Geckopush import geckopush
+import geckopush
 from tests import pull_keys
 
 
@@ -21,11 +21,13 @@ def test_bar_chart():
     bar.y_axis_format = "decimal"
     bar.y_axis_unit = "USD"
     ret = bar.push()
-    bar.get_payload()
+    print(bar.get_payload())
+    print(ret)
     if ret:
         return True
     else:
         return False
+
 
 
 def test_bullet_graph():
@@ -65,6 +67,7 @@ def test_bullet_graph():
     )
 
     ret = bullet.push()
+    print(bullet.get_payload())
     if ret:
         return True
     else:
@@ -84,6 +87,7 @@ def test_funnel():
     fun.add_data(800, "eight hundred")
 
     ret = fun.push()
+    print(fun.get_payload())
     if ret:
         return True
     else:
@@ -95,6 +99,7 @@ def test_geckometer():
     gm = geckopush.GeckoMeter(dashboard=d, widget_key=geckometer_widget_key,
                               item=26, min_value=0, max_value=50)
     ret = gm.push()
+    print(gm.get_payload())
     if ret:
         return True
     else:
@@ -109,6 +114,7 @@ def test_highchart():
                          highchart=highchart_str)
 
     ret = hc.push()
+    print(hc.get_payload())
     if ret:
         return True
     else:
@@ -125,6 +131,7 @@ def test_leaderboard():
     lb.add_data("Barney", 0, 0)
     lb.add_data("Farnsworth", 96, 4)
     ret = lb.push()
+    print(lb.get_payload())
     if ret:
         return True
     else:
@@ -142,6 +149,7 @@ def test_line_chart_datetime():
     lc.add(y_axis_format="currency")
     lc.add(y_axis_unit="USD")
     ret = lc.push()
+    print(lc.get_payload())
     if ret:
         return True
     else:
@@ -157,6 +165,7 @@ def test_List():
 
     lt.add_data(text="abcde", name="letters", color= "#ffffff", description="These are letters")
     ret = lt.push()
+    print(lt.get_payload())
     if ret:
         return True
     else:
@@ -170,6 +179,7 @@ def test_map():
     mp.add_data(ip="46.228.47.115")
     mp.add_data(latitude=22.434355, longitude=11.12345, size=5, color="#ffffff")
     ret = mp.push()
+    print(mp.get_payload())
     if ret:
         return True
     else:
@@ -180,6 +190,7 @@ def test_monitoring():
     mo = geckopush.Monitoring(dashboard=d, widget_key=monitoring_widget_key)
     mo.add_data(status="up", downtime="Never", responsetime= "123 ms")
     ret = mo.push()
+    print(mo.get_payload())
     if ret:
         return True
     else:
@@ -191,6 +202,7 @@ def test_pie_chart():
     pi.add_data(100, "Slice 1", "13699c")
     pi.add_data(200, "Slice 2", "198acd")
     ret = pi.push()
+    print(pi.get_payload())
     if ret:
         return True
     else:
@@ -201,6 +213,7 @@ def test_number_and_secondary_stat_1():
     ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
     ns.add_data(primary_value=15, secondary_value=25)
     ret = ns.push()
+    print(ns.get_payload())
     if ret:
         return True
     else:
@@ -211,6 +224,7 @@ def test_number_and_secondary_stat_2():
     ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
     ns.add_data(primary_value=15, text="Hola Amigo")
     ret = ns.push()
+    print(ns.get_payload())
     if ret:
         return True
     else:
@@ -221,6 +235,7 @@ def test_number_and_secondary_stat_3():
     ns = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
     ns.add_data(primary_value=15, secondary_value=[12345, 12345, 15555, 12345, 12322])
     ret = ns.push()
+    print(ns.get_payload())
     if ret:
         return True
     else:
@@ -233,6 +248,8 @@ def test_rag_numbers():
     rg.add_data(text="Two", value=100, prefix="$", color="amber")
     rg.add_data(text="Three", value=150, prefix="$", color="red")
     ret = rg.push()
+    print(rg.get_payload())
+
     if ret:
         return True
     else:
@@ -245,6 +262,7 @@ def test_rag_columns():
     rg.add_data(text="Two", value=100, prefix="$", color="amber")
     rg.add_data(text="Three", value=150, prefix="$", color="red")
     ret = rg.push()
+    print(rg.get_payload())
     if ret:
         return True
     else:
@@ -256,6 +274,7 @@ def test_text():
     rg.add_data(text="Hello There My Friend", type=0)
     rg.add_data(text="How are you doing?", type=1)
     ret = rg.push()
+    print(rg.get_payload())
     if ret:
         return True
     else:
