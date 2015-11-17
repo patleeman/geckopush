@@ -1,0 +1,2 @@
+v0.3
+- Fixed bug in number and secondary stat widget where it would throw an exception when no secondary stat or text was specified.
