@@ -1,4 +1,4 @@
-#Geckopush v 0.2 
+#Geckopush v 0.3
 ###Easy to use python library for pushing data your custom Geckoboard widgets.
 Geckopush makes pushing data to your Geckoboard.com custom widgets painless.  It handles structuring your widgets' JSON, request, and subsequent push to Geckoboard's servers.  It takes the difficult work out of getting your custom data to your dashboard.
 
@@ -463,6 +463,9 @@ mo.push()
 ```
 
 ### Number and Secondary Stat
+
+When adding values to the Number and Secondary Stat widget, you must add all data either during instantiation or at once with the .add_data() method.  You can not .add_data(primary_value=123) and then .add_data(secondary_value=456).  It must be specified in the same call i.e. .add_data(primary_value=123, secondary_value=456).
+
 Parameter Name | Optional | Data Type | Instance Variable Name | Notes
 :---------------|:----------|:-----------|:--------|:----------------------
 primary_value | no | int, float | | stored in self.data
