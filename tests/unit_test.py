@@ -224,6 +224,11 @@ class TestNumberAndSecondary3(unittest.TestCase, Base):
         self.widget = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
         self.widget.add_data(primary_value=15, secondary_value=[12345, 12345, 15555, 12345, 12322])
 
+class TestNumberAndSecondary4(unittest.TestCase, Base):
+    def setUp(self):
+        self.payload = {'data': {'item': [{'value': 15}]}, 'api_key': 'api-key-123'}
+        self.widget = geckopush.NumberAndSecondaryStat(dashboard=d, widget_key=widget_key)
+        self.widget.add_data(primary_value=15)
 
 class TestRAG(unittest.TestCase, Base):
     def setUp(self):

@@ -709,6 +709,12 @@ class NumberAndSecondaryStat(Widget):
             elif isinstance(secondary_value, list):
                 self.data.append(secondary_value)
 
+        elif secondary_value is None and text is None:
+            _item = {
+                "value": primary_value
+            }
+            self.data.append(_item)
+
         else:
             raise GeckoboardException(
                 "Widget accepts text or a secondary value only."
