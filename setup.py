@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(name='geckopush',
       packages=['geckopush'],
-      version='0.3',
+      version='0.4',
       description="Easy to use python 3 library for pushing data your custom Geckoboard widgets",
       author="Patrick Lee",
       author_email="me@patricklee.nyc",

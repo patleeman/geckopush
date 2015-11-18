@@ -709,6 +709,28 @@ class NumberAndSecondaryStat(Widget):
             elif isinstance(secondary_value, list):
                 self.data.append(secondary_value)
 
+        elif secondary_value is not None and text is not None:
+            _item_1 = {
+                    "value": primary_value,
+                    "text": text
+                }
+            self.data.append(_item_1)
+
+            # Check if secondary value is an integer or float
+            if isinstance(secondary_value, int) or \
+                    isinstance(secondary_value, float):
+
+                _item_2 = {
+                    "value": secondary_value
+                }
+                self.data.append(_item_2)
+
+            # Check if the secondary value is a list, throw error if it is.
+            elif isinstance(secondary_value, list):
+                raise GeckoboardException(
+                    "Secondary value can not be a list when both text and secondary value supplied."
+                )
+
         elif secondary_value is None and text is None:
             _item = {
                 "value": primary_value
