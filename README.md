@@ -1,3 +1,6 @@
+# THIS LIBRARY IS NOT ACTIVELY MAINTAINED.  
+If you fork it, let me know and I can direct users to your fork.
+
 #Geckopush v 0.4
 ###Easy to use python library for pushing data your custom Geckoboard widgets.
 Geckopush makes pushing data to your Geckoboard.com custom widgets painless.  It handles structuring your widgets' JSON, request, and subsequent push to Geckoboard's servers.  It takes the difficult work out of getting your custom data to your dashboard.
